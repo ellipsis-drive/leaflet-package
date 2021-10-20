@@ -84,7 +84,7 @@ expires: number //expiration time in milliseconds
 **parameters**
 | name | description | 
 | -- | -- |
-| mapId | The map or shape id of the project. |
+| blockId | The block or shape id of the project. |
 | includeDeleted | (Optional) Boolean whether to also return deleted items. Default false. |
 
 **return value**
