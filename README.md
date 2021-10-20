@@ -27,7 +27,7 @@ Ellipsis.RasterLayer(
 
 // Vector layer
 Ellipsis.VectorLayer(
-    mapId,
+    blockId,
     layerId,
     maxZoom,
     token
