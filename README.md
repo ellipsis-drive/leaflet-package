@@ -18,7 +18,7 @@ const map = L.map('map', {
 
 // Raster layer
 Ellipsis.RasterLayer(
-    mapId,
+    blockId,
     captureId,
     visualizationId,
     maxZoom,
@@ -37,7 +37,7 @@ Ellipsis.VectorLayer(
 
 | Name        | Description |
 | ----------- | -----------|
-| mapId        | id of the map|
+| blockId        | id of the block|
 | captureId     | id of the timestamp |
 | visualizationId     | id of the layer |
 | maxZoom        | maxZoomlevel of the layer|
@@ -48,7 +48,7 @@ Ellipsis.VectorLayer(
 
 | Name        | Description | 
 | ----------- | ----------- |
-| mapId        | Id of the map |
+| blockId        | Id of the block |
 | layerId     | Id of the layer |
 | maxZoom        | maxZoomlevel of the layer |
 | mapRef | A reference* to the MapContainer |
@@ -60,7 +60,7 @@ Ellipsis.VectorLayer(
 | pageSize | Size to retreive per step. Default 25, max 3000. |
 | maxMbPerTile        | The maximum mb to load per tile. Default 16mb. |
 | maxTilesInCache        | The number of tiles to keep in cache. Default 500. |
-| maxVectorsPerTile        | The maximum number of vectors to load per tile. Default 200. |
+| maxFeaturesPerTile        | The maximum number of features to load per tile. Default 200. |
 | radius | The radius of the points in the layer. Default 15. |
 | lineWidth | The width/weight of the lines in the layer. Default 5. |
 
