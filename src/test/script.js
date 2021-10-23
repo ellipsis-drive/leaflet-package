@@ -21,6 +21,8 @@ function init() {
         13
     ).addTo(map)
 
+    Ellipsis.VectorLayer().addTo(map);
+
     // Vector layer
     // Ellipsis.VectorLayer(
     //     blockId,
