@@ -45,11 +45,29 @@ class EllipsisVectorLayer extends L.LayerGroup {
         this.changed = false;
 
         this.on("add", async (x) => {
-            this.onGetTiles();
-            await this.getVectors();
 
-            const elements = this.prepareGeometryLayer();
-            console.log(elements);
+            this.onGetTiles();
+
+            this.gettingVectors = setInterval(async () => {
+                await this.getVectors();
+            }, 1000);
+
+            this.refreshingView = setInterval(() => {
+                this.prepareGeometryLayer();
+            }, 3000)
+
+            // setInterval(async () => {
+               
+            //     this.onGetTiles();
+            //     if(await this.getVectors()) {
+            //         console.log('something changed');
+            //         this.prepareGeometryLayer();
+            //     }else console.log('nothing changed');
+            // }, 100);
+            // this.onGetTiles();
+            // await this.getVectors();
+
+            // const elements = 
 
             // setInterval(() => {
             //     console.log('interval');
@@ -66,50 +84,54 @@ class EllipsisVectorLayer extends L.LayerGroup {
             // console.log(x);
             // console.log(x.target._map.getBounds());
 
-            this._map.on("update", (x) => {
-                console.log(x);
-            });
+            // this._map.on("update", (x) => {
+            //     console.log(x);
+            // });
 
-            this._map.on("resize", (x) => {
-                console.log("resize");
-            });
+            // this._map.on("resize", (x) => {
+            //     console.log("resize");
+            // });
 
-            this._map.on("zoomlevelschange", (x) => {
-                console.log("zoomlevelchange");
-            });
+            // this._map.on("zoomlevelschange", (x) => {
+            //     console.log("zoomlevelchange");
+            // });
 
-            this._map.on("moveend", async (x) => {
-                console.log("move end");
-                this.onGetTiles();
-                await this.getVectors();
+            // this._map.on("moveend", async (x) => {
+            //     console.log("move end");
 
-                const elements = this.prepareGeometryLayer();
-                console.log(elements);
-            });
 
-            this._map.on("move", (x) => {
-                console.log("move");
-            });
 
-            this._map.on("movestart", (x) => {
-                console.log("move start");
-            });
+            //     this.onGetTiles();
+            //     await this.getVectors();
+
+            //     const elements = this.prepareGeometryLayer();
+            // });
+
+            // this._map.on("move", (x) => {
+            //     console.log("move");
+            // });
+
+            // this._map.on("movestart", (x) => {
+            //     console.log("move start");
+            // });
 
             this._map.on("zoom", (x) => {
                 console.log("zoom");
+                this.onGetTiles();
+                this.viewRefreshed = true;
             });
 
-            this._map.on("zoomstart", (x) => {
-                console.log("zoom start");
-            });
+            // this._map.on("zoomstart", (x) => {
+            //     console.log("zoom start");
+            // });
 
-            this._map.on("viewreset", (x) => {
-                console.log("view reset");
-            });
+            // this._map.on("viewreset", (x) => {
+            //     console.log("view reset");
+            // });
 
-            this._map.on("remove", (x) => {
-                console.log("remove");
-            });
+            // this._map.on("remove", (x) => {
+            //     console.log("remove");
+            // });
         });
     }
     
@@ -121,6 +143,7 @@ class EllipsisVectorLayer extends L.LayerGroup {
     }
 
     getVectors = async () => {
+        console.log('getting vectors');
         const now = Date.now();
 
         //clear cache
@@ -147,7 +170,6 @@ class EllipsisVectorLayer extends L.LayerGroup {
             if (this.geometryLayer.tiles[tileId]) {
                 pageStart = this.geometryLayer.tiles[tileId].nextPageStart;
             }
-
             if (!this.geometryLayer.tiles[tileId] ||
                 (pageStart &&
                     this.geometryLayer.tiles[tileId].amount <
@@ -155,7 +177,10 @@ class EllipsisVectorLayer extends L.LayerGroup {
                     this.geometryLayer.tiles[tileId].size <
                         this.maxMbPerTile)
             ) {
+                console.log(`NEXT PAGE START: ${pageStart}`)
                 return { tileId: t, pageStart };
+            } else {
+                console.log(this.geometryLayer.tiles[tileId])
             }
 
             return null;
@@ -163,6 +188,7 @@ class EllipsisVectorLayer extends L.LayerGroup {
 
         tilesParam = tilesParam.filter((x) => x);
         //prepare other parameters
+
         if (tilesParam.length > 0) {
             //get addtional elements
             await getGeoJsons(
@@ -183,41 +209,38 @@ class EllipsisVectorLayer extends L.LayerGroup {
             return true;
         }
         return false;
+
     };
 
     prepareGeometryLayer = () => {
         let geometryTiles = this.tiles;
+        console.log(this.tiles);
         if (!geometryTiles) return [];
         
         let layerElements = [];
         geometryTiles.forEach(t => {
             const extra = this.geometryLayer.tiles[t.zoom + "_" + t.tileX + "_" + t.tileY];
             if(extra)
-                layerElements = layerElements.concat(extra);
+                layerElements = layerElements.concat(extra.elements);
         })
 
+        if(this.viewRefreshed) {
+            this.viewRefreshed = false;
+            this.clearLayers();
+        }
+
         layerElements.forEach(x => {
-            if(x.size > 0) {
-                console.log("X vvvvv")
-                console.log(x);
-                x.elements.forEach(leafletElement => {
-                    // console.log('looking to add layer');
-                    const layersInGroup = Object.values(this._layers)
-                    console.log(layersInGroup.length);
-                    if(!layersInGroup.includes(leafletElement)){
-                        // console.log('adding layer');
-                        this.addLayer(leafletElement);
-                    } else console.log('not adding layer');
-                        
-                })
+            if(this.hasLayer(x)){
+                console.log("already contains layer...");
+                return;
             }
+            this.addLayer(x);
         })
 
         return layerElements;
     };
 
     selectFeature = async (feature) => {
-        console.log("SELECTING");
         let body = {
             mapId: this.blockId,
             layerId: this.layerId,
@@ -297,7 +320,7 @@ const getGeoJsons = async (
 ) => {
     let returnType = showLocation ? "center" : "geometry";
     filter = filter ? (filter.length > 0 ? filter : null) : null;
-    console.log(layerId)
+    // console.log(layerId)
     let body = {
         mapId: mapId,
         returnType: returnType,
@@ -314,6 +337,8 @@ const getGeoJsons = async (
     for (let k = 0; k < tiles.length; k += chunkSize) {
         body.tiles = tiles.slice(k, k + chunkSize);
         try {
+            // console.log('any pageStart??');
+            // console.log(body.tiles.some(x => x.pageStart));
             let res = await EllipsisApi.post("/geometry/tile", body, token);
             result = result.concat(res);
         } catch {
