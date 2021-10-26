@@ -48,13 +48,10 @@ class EllipsisVectorLayer extends L.LayerGroup {
 
             this.onGetTiles();
 
-            this.gettingVectors = setInterval(async () => {
-                await this.getVectors();
-            }, 1000);
-
-            this.refreshingView = setInterval(() => {
-                this.prepareGeometryLayer();
-            }, 3000)
+            this.gettingVectorsInterval = setInterval(async () => {
+                let loadedSomething = await this.getVectors();
+                this.updateView(loadedSomething);
+            }, 100);
 
             // setInterval(async () => {
                
@@ -116,10 +113,14 @@ class EllipsisVectorLayer extends L.LayerGroup {
             // });
 
             this._map.on("zoom", (x) => {
-                console.log("zoom");
                 this.onGetTiles();
-                this.viewRefreshed = true;
+                this.viewPortRefreshed = true;
             });
+
+            this._map.on("moveend", (x) => {
+                this.onGetTiles();
+                this.viewPortRefreshed = true;
+            })
 
             // this._map.on("zoomstart", (x) => {
             //     console.log("zoom start");
@@ -143,7 +144,9 @@ class EllipsisVectorLayer extends L.LayerGroup {
     }
 
     getVectors = async () => {
-        console.log('getting vectors');
+        if(this.gettingVectors) return true;
+        this.gettingVectors = true;
+        // console.log('getting vectors');
         const now = Date.now();
 
         //clear cache
@@ -177,10 +180,8 @@ class EllipsisVectorLayer extends L.LayerGroup {
                     this.geometryLayer.tiles[tileId].size <
                         this.maxMbPerTile)
             ) {
-                console.log(`NEXT PAGE START: ${pageStart}`)
+                // console.log(`NEXT PAGE START: ${pageStart}`)
                 return { tileId: t, pageStart };
-            } else {
-                console.log(this.geometryLayer.tiles[tileId])
             }
 
             return null;
@@ -206,38 +207,55 @@ class EllipsisVectorLayer extends L.LayerGroup {
                 now,
                 this.centerPoints
             );
+            this.gettingVectors = false;
             return true;
         }
+        this.gettingVectors = false;
         return false;
 
     };
 
-    prepareGeometryLayer = () => {
-        let geometryTiles = this.tiles;
-        console.log(this.tiles);
-        if (!geometryTiles) return [];
+    updateView = (loading) => {
+        if(!this.tiles || this.tiles.length === 0) return;
         
-        let layerElements = [];
-        geometryTiles.forEach(t => {
-            const extra = this.geometryLayer.tiles[t.zoom + "_" + t.tileX + "_" + t.tileY];
-            if(extra)
-                layerElements = layerElements.concat(extra.elements);
-        })
+        if(!this.viewPortRefreshed && !loading) {
+            console.log('no need to refresh view');
+            return;
+        }
 
-        if(this.viewRefreshed) {
-            this.viewRefreshed = false;
+        const layerElements = this.tiles.flatMap(t => {
+            const geoTile = this.geometryLayer.tiles[t.zoom + "_" + t.tileX + "_" + t.tileY];
+            return geoTile ? geoTile.elements : [];
+        });
+
+        if(this.viewPortRefreshed) {
+            //if still loading, only display new features when there are more
+            //than already in the view.
+            console.log(`loading: ${loading} -- ${layerElements.length}/${this.getLayers().length}`);
+            
+            //## 2 different options:
+            //1) load double elements when certain percentage is not loaded
+            //2) wait with showing newly loaded elements until certain percentage is loaded
+            
+            // ## option 1
+            // if(!loading || this.getLayers().length/2 <= layerElements.length) {
+            //     console.log('refreshing tiles');
+            //     this.viewPortRefreshed = false;
+            //     this.clearLayers();
+            // }
+
+            // ## option 2
+            if(loading && this.getLayers().length/2 > layerElements.length)
+                return;
+            console.log('refreshing tiles');
+            this.viewPortRefreshed = false;
             this.clearLayers();
         }
 
         layerElements.forEach(x => {
-            if(this.hasLayer(x)){
-                console.log("already contains layer...");
-                return;
-            }
-            this.addLayer(x);
+            if(!this.hasLayer(x))
+                this.addLayer(x);
         })
-
-        return layerElements;
     };
 
     selectFeature = async (feature) => {
