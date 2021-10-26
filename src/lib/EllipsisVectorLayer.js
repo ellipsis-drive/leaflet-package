@@ -1,29 +1,10 @@
 class EllipsisVectorLayer extends L.LayerGroup {
-    //map is stored in this._map
-    setNewViewportTimer = null;
-
-//     blockId        | Id of the block |
-// | layerId     | Id of the layer |
-// | maxZoom        | maxZoomlevel of the layer |
-// | mapRef | A reference* to the MapContainer |
-// | selectFeature        | A function to run on feature click, with as argument the clicked feature |
-// | token        | (Optional) Token of the user |
-// | styleId        | (Optional) Id of the layer style|
-// | filter        | (Optional) A property filter to use|
-// | centerPoints        | Boolean whether to render only center points. Default false. |
-// | pageSize | Size to retreive per step. Default 25, max 3000. |
-// | maxMbPerTile        | The maximum mb to load per tile. Default 16mb. |
-// | maxTilesInCache        | The number of tiles to keep in cache. Default 500. |
-// | maxFeaturesPerTile        | The maximum number of features to load per tile. Default 200. |
-// | radius | The radius of the points in the layer. Default 15. |
-// | lineWidth | The width/weight of the lines in the layer. Default 5. |
 
     constructor(blockId, layerId, selectFeature, token, 
-        styleId, filter, centerPoints = false, maxZoom = 21, pageSize = 25, maxMbPerTile = 16, 
-        maxTilesInCache = 500, maxFeaturesPerTile = 200, radius = 15, lineWidth = 5) {
-        
-        //TODO add options instead of unmanageable parameters
+        styleId, filter, centerPoints, maxZoom, pageSize, maxMbPerTile, 
+        maxTilesInCache, maxFeaturesPerTile, radius, lineWidth) {
         super();
+
         this.blockId = blockId;
         this.layerId = layerId;
         this.maxZoom = maxZoom;
@@ -46,97 +27,30 @@ class EllipsisVectorLayer extends L.LayerGroup {
 
         this.on("add", async (x) => {
 
-            this.onGetTiles();
+            this.registerViewportUpdate();
 
             this.gettingVectorsInterval = setInterval(async () => {
                 let loadedSomething = await this.getVectors();
                 this.updateView(loadedSomething);
             }, 100);
 
-            // setInterval(async () => {
-               
-            //     this.onGetTiles();
-            //     if(await this.getVectors()) {
-            //         console.log('something changed');
-            //         this.prepareGeometryLayer();
-            //     }else console.log('nothing changed');
-            // }, 100);
-            // this.onGetTiles();
-            // await this.getVectors();
-
-            // const elements = 
-
-            // setInterval(() => {
-            //     console.log('interval');
-            //     this.addLayer(L.marker([40.505, -0.09]));
-            //     this.removeLayer(marker);
-            //     // const mapRef = this._map;
-            //     // this._map.removeLayer(this);
-            // }, 5000)
-
-            // this._map.invalidateSize();
-
-            // this.map = x.target._map
-            // console.log(this._map.getBounds());
-            // console.log(x);
-            // console.log(x.target._map.getBounds());
-
-            // this._map.on("update", (x) => {
-            //     console.log(x);
-            // });
-
-            // this._map.on("resize", (x) => {
-            //     console.log("resize");
-            // });
-
-            // this._map.on("zoomlevelschange", (x) => {
-            //     console.log("zoomlevelchange");
-            // });
-
-            // this._map.on("moveend", async (x) => {
-            //     console.log("move end");
-
-
-
-            //     this.onGetTiles();
-            //     await this.getVectors();
-
-            //     const elements = this.prepareGeometryLayer();
-            // });
-
-            // this._map.on("move", (x) => {
-            //     console.log("move");
-            // });
-
-            // this._map.on("movestart", (x) => {
-            //     console.log("move start");
-            // });
-
             this._map.on("zoom", (x) => {
-                this.onGetTiles();
+                this.registerViewportUpdate();
                 this.viewPortRefreshed = true;
             });
 
             this._map.on("moveend", (x) => {
-                this.onGetTiles();
+                this.registerViewportUpdate();
                 this.viewPortRefreshed = true;
-            })
+            });
 
-            // this._map.on("zoomstart", (x) => {
-            //     console.log("zoom start");
-            // });
-
-            // this._map.on("viewreset", (x) => {
-            //     console.log("view reset");
-            // });
-
-            // this._map.on("remove", (x) => {
-            //     console.log("remove");
-            // });
+            this._map.on("remove", (x) => {
+                clearInterval(this.gettingVectorsInterval);
+            });
         });
     }
     
-    onGetTiles = () => {
+    registerViewportUpdate = () => {
         const viewport = getLeafletMapBounds(this._map);
         if (!viewport) return;
         this.zoom = Math.max(Math.min(this.maxZoom, viewport.zoom - 2), 0);
@@ -146,7 +60,6 @@ class EllipsisVectorLayer extends L.LayerGroup {
     getVectors = async () => {
         if(this.gettingVectors) return true;
         this.gettingVectors = true;
-        // console.log('getting vectors');
         const now = Date.now();
 
         //clear cache
@@ -180,7 +93,6 @@ class EllipsisVectorLayer extends L.LayerGroup {
                     this.geometryLayer.tiles[tileId].size <
                         this.maxMbPerTile)
             ) {
-                // console.log(`NEXT PAGE START: ${pageStart}`)
                 return { tileId: t, pageStart };
             }
 
@@ -355,8 +267,6 @@ const getGeoJsons = async (
     for (let k = 0; k < tiles.length; k += chunkSize) {
         body.tiles = tiles.slice(k, k + chunkSize);
         try {
-            // console.log('any pageStart??');
-            // console.log(body.tiles.some(x => x.pageStart));
             let res = await EllipsisApi.post("/geometry/tile", body, token);
             result = result.concat(res);
         } catch {
@@ -393,8 +303,7 @@ const getGeoJsons = async (
                 lineWidth,
                 radius,
                 500,
-                selectFeature,
-                feature.properties.id + "_" + returnType + "_" + styleId
+                selectFeature
             );
             elements = elements.concat(newElements);
         }
@@ -410,7 +319,6 @@ const featureToGeoJson = (
     radius,
     geometryLength,
     onFeatureClick,
-    key,
     asMarker,
     forceColor = false
 ) => {
@@ -455,17 +363,20 @@ const featureToGeoJson = (
                         click: () => onFeatureClick(feature),
                     });
                 } : null,
+                interactive: onFeatureClick ? true : false
             }),
         ];
     } else if (type === "Point" || type === "MultiPoint") {
         radius = Math.min(150 / geometryLength ** 0.5, radius);
 
-        let coords = feature.geometry.coordinates;
-        let isMultiMarker = Array.isArray(coords) && Array.isArray(coords[0]);
+        const coords = feature.geometry.coordinates;
+        const isMultiMarker = Array.isArray(coords) && Array.isArray(coords[0]);
         if (isMultiMarker === true) {
             if (asMarker) {
                 element = coords.map((coord) => (
-                    L.marker([coord[1], coord[0]])
+                    L.marker([coord[1], coord[0]], {
+                        interactive: onFeatureClick ? true : false
+                    })
                     .on("click", onFeatureClick ? () => onFeatureClick(feature) : null)
                 ));
             } else {
@@ -474,14 +385,17 @@ const featureToGeoJson = (
                         radius: radius,
                         opacity: 1,
                         color: color,
-                        weight: 2
+                        weight: 2,
+                        interactive: onFeatureClick ? true : false
                     }).on("click", onFeatureClick ? () => onFeatureClick(feature) : null)
                 ));
             }
         } else {
             if (asMarker) {
                 element = [ //TODO fix a wrong bracket here in react-leaflet package
-                    L.marker([coords[1], coords[0]])
+                    L.marker([coords[1], coords[0]], {
+                        interactive: onFeatureClick ? true : false
+                    })
                     .on("click", onFeatureClick ? () => onFeatureClick(feature) : null)
                 ];
             } else {
@@ -490,7 +404,8 @@ const featureToGeoJson = (
                         radius: radius,
                         opacity: 1,
                         color: color,
-                        weight: 2
+                        weight: 2,
+                        interactive: onFeatureClick ? true : false
                     }).on("click", onFeatureClick ? () => onFeatureClick(feature) : null),
                 ];
             }
@@ -513,13 +428,3 @@ const getLeafletMapBounds = (leafletMap) => {
 
     return { bounds: bounds, zoom: leafletMap._zoom };
 };
-
-//   EllipsisVectorLayer.defaultProps = {
-//     pageSize: 25,
-//     maxZoom: 21,
-//     lineWidth: 5,
-//     radius: 15,
-//     maxFeaturesPerTile: 200,
-//     maxMbPerTile: 16000000,
-//     maxTilesInCache: 500
-//   }

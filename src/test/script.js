@@ -12,12 +12,11 @@ function init() {
     tileLayer.addTo(map);
 
     // Raster layer
-    // Ellipsis.RasterLayer(
-    //     '01104b4f-85a7-482c-9ada-11dbce171982',
-    //     0,
-    //     '01f63a0d-3f92-42d3-925d-b3bfaf6dd6a1',
-    //     13
-    // ).addTo(map)
+    Ellipsis.RasterLayer(
+        '01104b4f-85a7-482c-9ada-11dbce171982',
+        0,
+        '01f63a0d-3f92-42d3-925d-b3bfaf6dd6a1'
+    ).addTo(map)
     
     Ellipsis.VectorLayer(
         '1a24a1ee-7f39-4d21-b149-88df5a3b633a',

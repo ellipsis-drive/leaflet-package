@@ -20,17 +20,21 @@ const map = L.map('map', {
 Ellipsis.RasterLayer(
     blockId,
     captureId,
-    visualizationId,
-    maxZoom,
-    token
+    visualizationId, 
+    { //options
+        maxZoom: 25,
+        token: yourToken
+    }
 ).addTo(map)
 
 // Vector layer
 Ellipsis.VectorLayer(
     blockId,
-    layerId,
-    maxZoom,
-    token
+    layerId, 
+    { //options
+        maxZoom: 25,
+        token: yourToken
+    }
 ).addTo(map)
 ```
 #### RasterLayer parameters
@@ -40,8 +44,13 @@ Ellipsis.VectorLayer(
 | blockId        | id of the block|
 | captureId     | id of the timestamp |
 | visualizationId     | id of the layer |
-| maxZoom        | maxZoomlevel of the layer|
-| token        | token of the user (optional)|
+| options | optional options object|
+
+#### RasterLayer options
+| Name | Description |
+| -- | -- |
+| maxZoom        | maxZoomlevel of the layer. Default 25.|
+| token        | token of the user |
 
 
 #### VectorLayer parameters
@@ -50,12 +59,17 @@ Ellipsis.VectorLayer(
 | ----------- | ----------- |
 | blockId        | Id of the block |
 | layerId     | Id of the layer |
-| maxZoom        | maxZoomlevel of the layer |
-| mapRef | A reference* to the MapContainer |
+| options | optional options object |
+
+#### VectorLayer options
+
+| Name        | Description | 
+| ----------- | ----------- |
 | selectFeature        | A function to run on feature click, with as argument the clicked feature |
-| token        | (Optional) Token of the user |
-| styleId        | (Optional) Id of the layer style|
-| filter        | (Optional) A property filter to use|
+| token        | Token of the user |
+| styleId        | Id of the layer style|
+| filter        | A property filter to use|
+| maxZoom        | maxZoomlevel of the layer. Default 25. |
 | centerPoints        | Boolean whether to render only center points. Default false. |
 | pageSize | Size to retreive per step. Default 25, max 3000. |
 | maxMbPerTile        | The maximum mb to load per tile. Default 16mb. |
