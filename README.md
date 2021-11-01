@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <!-- Import ellipsis library -->
-<script src="adress of library"></script>
+<script src="path to library"></script>
 ```
 
 ### Add an ellipsis-drive map to leaflet map
