@@ -1,4 +1,4 @@
-// Build date: Mon Nov  1 17:22:12 CET 2021
+// Build date: vr 12 nov 2021 18:59:41
 
 const apiUrl = 'https://api.ellipsis-drive.com/v1';
 
@@ -96,12 +96,11 @@ const EllipsisApi = {
         return ellipsisApiManagerFetch('POST', '/metadata', body);
     }
 }
-
 class EllipsisVectorLayer extends L.LayerGroup {
 
     constructor(blockId, layerId, selectFeature, token, 
         styleId, filter, centerPoints, maxZoom, pageSize, maxMbPerTile, 
-        maxTilesInCache, maxFeaturesPerTile, radius, lineWidth) {
+        maxTilesInCache, maxFeaturesPerTile, radius, lineWidth, useMarkers) {
         super();
 
         this.blockId = blockId;
@@ -118,6 +117,7 @@ class EllipsisVectorLayer extends L.LayerGroup {
         this.maxFeaturesPerTile = maxFeaturesPerTile;
         this.radius = radius;
         this.lineWidth = lineWidth;
+        this.useMarkers = useMarkers;
 
         this.tiles = [];
         this.geometryLayer = { tiles: [] };
@@ -216,7 +216,8 @@ class EllipsisVectorLayer extends L.LayerGroup {
                 this.selectFeature,
                 this.filter,
                 now,
-                this.centerPoints
+                this.centerPoints,
+                this.useMarkers
             );
             this.gettingVectors = false;
             return true;
@@ -262,7 +263,6 @@ class EllipsisVectorLayer extends L.LayerGroup {
             this.viewPortRefreshed = false;
             this.clearLayers();
         }
-
         layerElements.forEach(x => {
             if(!this.hasLayer(x))
                 this.addLayer(x);
@@ -345,7 +345,8 @@ const getGeoJsons = async (
     selectFeature,
     filter,
     date,
-    showLocation
+    showLocation,
+    useMarkers
 ) => {
     let returnType = showLocation ? "center" : "geometry";
     filter = filter ? (filter.length > 0 ? filter : null) : null;
@@ -402,7 +403,8 @@ const getGeoJsons = async (
                 lineWidth,
                 radius,
                 500,
-                selectFeature
+                selectFeature,
+                useMarkers
             );
             elements = elements.concat(newElements);
         }
@@ -454,7 +456,7 @@ const featureToGeoJson = (
                 style: color ? (x) => {
                     if(type === "Polygon" || type === "MultiPolygon")
                         return createGeoJsonLayerStyle(color, alpha, width)
-                    else 
+                    else //TODO find out if width should also affect 8 here. And why no alpha value?
                         return createGeoJsonLayerStyle(color, 1, 8)
                 } : null,
                 onEachFeature: onFeatureClick ? (feature, layer) => {
@@ -525,9 +527,11 @@ const getLeafletMapBounds = (leafletMap) => {
         yMax: screenBounds.getNorth(),
     };
 
+    console.log(bounds);
+    console.log(leafletMap._zoom);
+
     return { bounds: bounds, zoom: leafletMap._zoom };
 };
-
 class EllipsisRasterLayer extends L.tileLayer {
     constructor(blockId, captureId, visualizationId, maxZoom = 18, token) {
         let url = `${EllipsisApi.apiUrl}/tileService/${blockId}/${captureId}/${visualizationId}/{z}/{x}/{y}`;
@@ -542,14 +546,13 @@ class EllipsisRasterLayer extends L.tileLayer {
         });
     }
 }
-
 const Ellipsis = {
-    RasterLayer: (blockId, captureId, visualizationId, options = {}) => {
+    RasterLayer: (blockId, captureId, visualizationId, maxZoom = 21, options = {}) => {
         return new EllipsisRasterLayer(
             blockId, 
             captureId, 
             visualizationId, 
-            options.maxZoom ? options.maxZoom : 25, 
+            maxZoom,
             options.token
         );
     },
@@ -568,7 +571,8 @@ const Ellipsis = {
             options.maxTilesInCache ? options.maxTilesInCache : 500,
             options.maxFeaturesPerTile ? options.maxFeaturesPerTile : 200,
             options.radius ? options.radius : 15,
-            options.lineWidth ? options.lineWidth : 5
+            options.lineWidth ? options.lineWidth : 5,
+            options.useMarkers ? true : false
         );
     }
 }
