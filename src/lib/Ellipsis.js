@@ -1,10 +1,10 @@
 const Ellipsis = {
-    RasterLayer: (blockId, captureId, visualizationId, options = {}) => {
+    RasterLayer: (blockId, captureId, visualizationId, maxZoom = 21, options = {}) => {
         return new EllipsisRasterLayer(
             blockId, 
             captureId, 
             visualizationId, 
-            options.maxZoom ? options.maxZoom : 25, 
+            maxZoom,
             options.token
         );
     },
@@ -23,7 +23,8 @@ const Ellipsis = {
             options.maxTilesInCache ? options.maxTilesInCache : 500,
             options.maxFeaturesPerTile ? options.maxFeaturesPerTile : 200,
             options.radius ? options.radius : 15,
-            options.lineWidth ? options.lineWidth : 5
+            options.lineWidth ? options.lineWidth : 5,
+            options.useMarkers ? true : false
         );
     }
 }
