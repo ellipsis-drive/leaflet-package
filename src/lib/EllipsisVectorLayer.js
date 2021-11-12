@@ -2,7 +2,7 @@ class EllipsisVectorLayer extends L.LayerGroup {
 
     constructor(blockId, layerId, selectFeature, token, 
         styleId, filter, centerPoints, maxZoom, pageSize, maxMbPerTile, 
-        maxTilesInCache, maxFeaturesPerTile, radius, lineWidth) {
+        maxTilesInCache, maxFeaturesPerTile, radius, lineWidth, useMarkers) {
         super();
 
         this.blockId = blockId;
@@ -19,6 +19,7 @@ class EllipsisVectorLayer extends L.LayerGroup {
         this.maxFeaturesPerTile = maxFeaturesPerTile;
         this.radius = radius;
         this.lineWidth = lineWidth;
+        this.useMarkers = useMarkers;
 
         this.tiles = [];
         this.geometryLayer = { tiles: [] };
@@ -117,7 +118,8 @@ class EllipsisVectorLayer extends L.LayerGroup {
                 this.selectFeature,
                 this.filter,
                 now,
-                this.centerPoints
+                this.centerPoints,
+                this.useMarkers
             );
             this.gettingVectors = false;
             return true;
@@ -163,7 +165,6 @@ class EllipsisVectorLayer extends L.LayerGroup {
             this.viewPortRefreshed = false;
             this.clearLayers();
         }
-
         layerElements.forEach(x => {
             if(!this.hasLayer(x))
                 this.addLayer(x);
@@ -246,7 +247,8 @@ const getGeoJsons = async (
     selectFeature,
     filter,
     date,
-    showLocation
+    showLocation,
+    useMarkers
 ) => {
     let returnType = showLocation ? "center" : "geometry";
     filter = filter ? (filter.length > 0 ? filter : null) : null;
@@ -303,7 +305,8 @@ const getGeoJsons = async (
                 lineWidth,
                 radius,
                 500,
-                selectFeature
+                selectFeature,
+                useMarkers
             );
             elements = elements.concat(newElements);
         }
@@ -355,7 +358,7 @@ const featureToGeoJson = (
                 style: color ? (x) => {
                     if(type === "Polygon" || type === "MultiPolygon")
                         return createGeoJsonLayerStyle(color, alpha, width)
-                    else 
+                    else //TODO find out if width should also affect 8 here. And why no alpha value?
                         return createGeoJsonLayerStyle(color, 1, 8)
                 } : null,
                 onEachFeature: onFeatureClick ? (feature, layer) => {
@@ -425,6 +428,9 @@ const getLeafletMapBounds = (leafletMap) => {
         yMin: screenBounds.getSouth(),
         yMax: screenBounds.getNorth(),
     };
+
+    console.log(bounds);
+    console.log(leafletMap._zoom);
 
     return { bounds: bounds, zoom: leafletMap._zoom };
 };
