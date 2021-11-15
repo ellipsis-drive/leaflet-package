@@ -1,14 +1,40 @@
-class EllipsisVectorLayer extends L.LayerGroup {
+class EllipsisVectorLayer extends L.geoJSON {
 
-    constructor(blockId, layerId, selectFeature, token, 
+    constructor(blockId, layerId, onFeatureClick, token, 
         styleId, filter, centerPoints, maxZoom, pageSize, maxMbPerTile, 
-        maxTilesInCache, maxFeaturesPerTile, radius, lineWidth, useMarkers) {
-        super();
+        maxTilesInCache, maxFeaturesPerTile, radius, lineWidth, useMarkers, loadAll) {
+        super([], {
+            style: (feature) => {
+                return {
+                    //TODO Look if we are we missing any styling options
+                    color: feature.properties.color,
+                    fillColor: feature.properties.color,
+                    fillOpacity: feature.properties.fillOpacity,
+                    weight: feature.properties.weight
+                }
+            },
+            pointToLayer: useMarkers ? undefined : (feature, latlng) => {
+                return L.circleMarker(latlng, {
+                    //TODO look how different styling works
+                    radius: feature.properties.radius,
+                    color: feature.properties.color,
+                    fillColor: feature.properties.color,
+                    fillOpacity: feature.properties.fillOpacity,
+                    opacity: 1,
+                    weight: feature.properties.weight,
+                    interactive: onFeatureClick ? true : false
+                });
+            },
+            interactive: onFeatureClick ? true : false,
+            onEachFeature: onFeatureClick,
+            markersInheritOptions: true
+        });
+        this.id = `${blockId}_${layerId}`;
 
         this.blockId = blockId;
         this.layerId = layerId;
         this.maxZoom = maxZoom;
-        this.selectFeatureParam = selectFeature;
+        this.onFeatureClick = onFeatureClick;
         this.token = token;
         this.styleId = styleId;
         this.filter = filter;
@@ -20,29 +46,27 @@ class EllipsisVectorLayer extends L.LayerGroup {
         this.radius = radius;
         this.lineWidth = lineWidth;
         this.useMarkers = useMarkers;
+        this.loadAll = loadAll;
 
         this.tiles = [];
-        this.geometryLayer = { tiles: [] };
+        this.cache = [];
+        //keeps track of which features are printed
+        this.printedFeatureIds = [];
         this.zoom = 1;
         this.changed = false;
 
         this.on("add", async (x) => {
 
-            this.registerViewportUpdate();
+            this.handleViewportUpdate();
 
-            this.gettingVectorsInterval = setInterval(async () => {
-                let loadedSomething = await this.getVectors();
-                this.updateView(loadedSomething);
-            }, 100);
+            if(this.loadAll) return;
 
             this._map.on("zoom", (x) => {
-                this.registerViewportUpdate();
-                this.viewPortRefreshed = true;
+                this.handleViewportUpdate();
             });
 
             this._map.on("moveend", (x) => {
-                this.registerViewportUpdate();
-                this.viewPortRefreshed = true;
+                this.handleViewportUpdate();
             });
 
             this._map.on("remove", (x) => {
@@ -50,387 +74,324 @@ class EllipsisVectorLayer extends L.LayerGroup {
             });
         });
     }
-    
-    registerViewportUpdate = () => {
-        const viewport = getLeafletMapBounds(this._map);
+
+    handleViewportUpdate = () => {
+        const viewport = this.getMapBounds();
         if (!viewport) return;
         this.zoom = Math.max(Math.min(this.maxZoom, viewport.zoom - 2), 0);
-        this.tiles = boundsToTiles(viewport.bounds, this.zoom);
+        this.tiles = this.boundsToTiles(viewport.bounds, this.zoom);
+        this.printedFeatureIds = [];
+        if(this.gettingVectorsInterval) return;
+
+        this.gettingVectorsInterval = setInterval(async () => {
+            if(this.isLoading) return;
+
+            const loadedSomething = await this.loadStep();
+            if(!loadedSomething) {
+                clearInterval(this.gettingVectorsInterval);
+                this.gettingVectorsInterval = undefined;
+                return;
+            }
+            this.updateView();
+        }, 100);
+    };
+
+    updateView = () => {
+        if (!this.tiles || this.tiles.length === 0) return;
+
+        let features;
+        if(this.loadAll) {
+            features = this.cache;
+        } else {
+            features = this.tiles.flatMap((t) => {
+                const geoTile = this.cache[this.getTileId(t)];
+                return geoTile ? geoTile.elements : [];
+            });
+        }
+        if(!this.printedFeatureIds.length)
+            this.clearLayers();
+        this.addData(features.filter(x => !this.printedFeatureIds.includes(x.properties.id)));
+        features.forEach(x => this.printedFeatureIds.push(x.properties.id));
+    };
+
+    loadStep = async () => {
+        this.isLoading = true;
+        if(this.loadAll) {
+            const cachedSomething = await this.getAndCacheAllGeoJsons();
+            this.isLoading = false;
+            return cachedSomething;
+        }
+
+        this.ensureMaxCacheSize();
+        const cachedSomething = await this.getAndCacheGeoJsons();
+        this.isLoading = false;
+        return cachedSomething;
+    };
+
+    ensureMaxCacheSize = () => {
+        const keys = Object.keys(this.cache);
+        if (keys.length > this.maxTilesInCache) {
+            const dates = keys.map((k) => this.cache[k].date).sort();
+            const clipValue = dates[9];
+            keys.forEach((key) => {
+                if (this.cache[key].date <= clipValue) {
+                    delete this.cache[key];
+                }
+            });
+        }
+    };
+
+    getAndCacheAllGeoJsons = async () => {
+        if(this.nextPageStart === 4)
+            return false;
+        
+        const body = {
+            pageStart: this.nextPageStart,
+            mapId: this.blockId,
+            returnType: this.centerPoints ? "center" : "geometry",
+            layerId: this.layerId,
+            zip: true,
+            pageSize: Math.min(3000, this.pageSize),
+            styleId: this.styleId
+        };
+
+        try {
+            const res = await EllipsisApi.post("/geometry/get", body, {token: this.token});
+            this.nextPageStart = res.nextPageStart;
+            if(!res.nextPageStart) 
+                this.nextPageStart = 4; //EOT (end of transmission)
+            if(res.result && res.result.features) {
+                res.result.features.forEach(x => {
+                    this.styleGeoJson(x, this.lineWidth, this.radius);
+                    this.cache.push(x);
+                });
+            }
+        } catch {
+            return false;
+        }
+        return true;
     }
 
-    getVectors = async () => {
-        if(this.gettingVectors) return true;
-        this.gettingVectors = true;
-        const now = Date.now();
+    getAndCacheGeoJsons = async () => {
+        const date = Date.now();
+        //create tiles parameter which contains tiles that need to load more features
+        const tiles = this.tiles.map((t) => {
+            const tileId = this.getTileId(t);
 
-        //clear cache
-        const keys = Object.keys(this.geometryLayer.tiles);
-        if (keys.length > this.maxTilesInCache) {
-            let dates = keys.map(
-                (k) => this.geometryLayer.tiles[k].date
-            );
-            dates.sort();
-            let clipValue = dates[9];
-            keys.forEach(key => {
-                if (this.geometryLayer.tiles[key].date <= clipValue) {
-                    delete this.geometryLayer.tiles[key];
-                }
-            })
-        }
+            //If not cached, always try to load features.
+            if(!this.cache[tileId]) 
+                return { tileId: t}
 
-        //prepare tiles parameter
-        let tilesParam = [...this.tiles];
-        tilesParam = tilesParam.map((t) => {
-            const tileId = `${t.zoom}_${t.tileX}_${t.tileY}`;
+            const pageStart = this.cache[tileId].nextPageStart;
 
-            let pageStart;
-            if (this.geometryLayer.tiles[tileId]) {
-                pageStart = this.geometryLayer.tiles[tileId].nextPageStart;
-            }
-            if (!this.geometryLayer.tiles[tileId] ||
-                (pageStart &&
-                    this.geometryLayer.tiles[tileId].amount <
-                        this.maxFeaturesPerTile &&
-                    this.geometryLayer.tiles[tileId].size <
-                        this.maxMbPerTile)
-            ) {
-                return { tileId: t, pageStart };
-            }
+            //TODO in other packages we use < instead of <=
+            //Check if tile is not already fully loaded, and if more features may be loaded
+            if(pageStart && this.cache[tileId].amount <= this.maxFeaturesPerTile && this.cache[tileId].size <= this.maxMbPerTile)
+                return { tileId: t, pageStart }
 
             return null;
-        });
-
-        tilesParam = tilesParam.filter((x) => x);
-        //prepare other parameters
-
-        if (tilesParam.length > 0) {
-            //get addtional elements
-            await getGeoJsons(
-                this.geometryLayer,
-                tilesParam,
-                this.token,
-                this.blockId,
-                Math.min(3000, this.pageSize),
-                this.layerId,
-                this.styleId,
-                this.lineWidth,
-                this.radius,
-                this.selectFeature,
-                this.filter,
-                now,
-                this.centerPoints,
-                this.useMarkers
-            );
-            this.gettingVectors = false;
-            return true;
-        }
-        this.gettingVectors = false;
-        return false;
-
-    };
-
-    updateView = (loading) => {
-        if(!this.tiles || this.tiles.length === 0) return;
+        }).filter(x => x);
         
-        if(!this.viewPortRefreshed && !loading) {
-            console.log('no need to refresh view');
-            return;
-        }
+        // console.log("tiles:");
+        // console.log(tiles);
 
-        const layerElements = this.tiles.flatMap(t => {
-            const geoTile = this.geometryLayer.tiles[t.zoom + "_" + t.tileX + "_" + t.tileY];
-            return geoTile ? geoTile.elements : [];
-        });
+        if(tiles.length === 0) return false;
 
-        if(this.viewPortRefreshed) {
-            //if still loading, only display new features when there are more
-            //than already in the view.
-            console.log(`loading: ${loading} -- ${layerElements.length}/${this.getLayers().length}`);
-            
-            //## 2 different options:
-            //1) load double elements when certain percentage is not loaded
-            //2) wait with showing newly loaded elements until certain percentage is loaded
-            
-            // ## option 1
-            // if(!loading || this.getLayers().length/2 <= layerElements.length) {
-            //     console.log('refreshing tiles');
-            //     this.viewPortRefreshed = false;
-            //     this.clearLayers();
-            // }
-
-            // ## option 2
-            if(loading && this.getLayers().length/2 > layerElements.length)
-                return;
-            console.log('refreshing tiles');
-            this.viewPortRefreshed = false;
-            this.clearLayers();
-        }
-        layerElements.forEach(x => {
-            if(!this.hasLayer(x))
-                this.addLayer(x);
-        })
-    };
-
-    selectFeature = async (feature) => {
-        let body = {
+        const body = {
             mapId: this.blockId,
+            returnType: this.centerPoints ? "center" : "geometry",
             layerId: this.layerId,
-            geometryIds: [feature.properties.id],
-            returnType: "all",
+            zip: true,
+            pageSize: Math.min(3000, this.pageSize),
+            styleId: this.styleId,
+            propertyFilter: (this.filter && this.filter > 0) ? this.filter : null,
         };
-        try {
-            let result = await EllipsisApi.post(
-                "/geometry/ids",
-                body,
-                this.token
-            );
-            this.selectFeature({
-                size: result.size,
-                feature: result.result.features[0],
-            });
-        } catch (e) {
-            console.log(e);
+    
+        //Get new geometry for the tiles
+        let result = [];
+        const chunkSize = 10;
+        for (let k = 0; k < tiles.length; k += chunkSize) {
+            body.tiles = tiles.slice(k, k + chunkSize);
+            try {
+                const res = await EllipsisApi.post("/geometry/tile", body, {token: this.token});
+                result = result.concat(res);
+            } catch {
+                return false;
+            }
         }
+        
+        //Add newly loaded data to cache
+        for (let j = 0; j < tiles.length; j++) {
+            const tileId = this.getTileId(tiles[j].tileId);
+
+            if (!this.cache[tileId]) {
+                this.cache[tileId] = {
+                    size: 0,
+                    amount: 0,
+                    elements: [],
+                    nextPageStart: null,
+                };
+            }
+    
+            //set tile info for tile in this.
+            const tileData = this.cache[tileId];
+            tileData.date = date;
+            tileData.size = tileData.size + result[j].size;
+            tileData.amount = tileData.amount + result[j].result.features.length;
+            tileData.nextPageStart = result[j].nextPageStart;
+            result[j].result.features.forEach(x => this.styleGeoJson(x, this.lineWidth, this.radius));
+            tileData.elements = tileData.elements.concat(result[j].result.features);
+    
+        }
+        return true;
     };
+
+    getTileId = (tile) => `${tile.zoom}_${tile.tileX}_${tile.tileY}`;
+
+    styleGeoJson = (geoJson, weight, radius) => {
+        if(!geoJson || !geoJson.geometry || !geoJson.geometry.type || !geoJson.properties) return;
+
+        const type = geoJson.geometry.type;
+        const properties = geoJson.properties;
+        const color = properties.color;
+        const isHexColorFormat = /^#?([A-Fa-f0-9]{2}){3,4}$/.test(color);
+        //TODO add rgb(a) support
+
+        if(isHexColorFormat && color.length === 9)
+            properties.fillOpacity = parseInt(color.substring(8,10), 16) / 25.5;
+        else properties.fillOpacity = 0.6;
+
+        if(type === 'MultiPolygon' || type === 'Polygon') {
+            properties.weight = weight;
+        }
+        else if(type === 'Point' || type === 'MultiPoint') {
+            //TODO: weight default on 8 for LineString and MultiLineString?
+            properties.radius = radius;
+            properties.weight = 2;
+        }
+
+        if(isHexColorFormat && color.length === 9)
+            properties.color = color.substring(0,7);
+    }
+
+    boundsToTiles = (bounds, zoom) => {
+        const xMin = Math.max(bounds.xMin, -180);
+        const xMax = Math.min(bounds.xMax, 180);
+        const yMin = Math.max(bounds.yMin, -85);
+        const yMax = Math.min(bounds.yMax, 85);
+
+        const zoomComp = Math.pow(2, zoom);
+        const comp1 = zoomComp / 360;
+        const pi = Math.PI;
+        const comp2 = 2 * pi;
+        const comp3 = pi / 4;
+
+        const tileXMin = Math.floor((xMin + 180) * comp1);
+        const tileXMax = Math.floor((xMax + 180) * comp1);
+        const tileYMin = Math.floor(
+            (zoomComp / comp2) *
+                (pi - Math.log(Math.tan(comp3 + (yMax / 360) * pi)))
+        );
+        const tileYMax = Math.floor(
+            (zoomComp / comp2) *
+                (pi - Math.log(Math.tan(comp3 + (yMin / 360) * pi)))
+        );
+
+        let tiles = [];
+        for (
+            let x = Math.max(0, tileXMin - 1);
+            x <= Math.min(2 ** zoom - 1, tileXMax + 1);
+            x++
+        ) {
+            for (
+                let y = Math.max(0, tileYMin - 1);
+                y <= Math.min(2 ** zoom - 1, tileYMax + 1);
+                y++
+            ) {
+                tiles.push({ zoom, tileX: x, tileY: y });
+            }
+        }
+        return tiles;
+    };
+
+    getMapBounds = () => {
+        const leafletMap = this._map;
+        if (!leafletMap || !leafletMap._zoom) return;
+    
+        const screenBounds = leafletMap.getBounds();
+    
+        let bounds = {
+            xMin: screenBounds.getWest(),
+            xMax: screenBounds.getEast(),
+            yMin: screenBounds.getSouth(),
+            yMax: screenBounds.getNorth(),
+        };
+    
+        return { bounds: bounds, zoom: leafletMap._zoom };
+    };
+
+    // updateView = (loading) => {
+    //     if(!this.tiles || this.tiles.length === 0) return;
+        
+    //     if(!this.viewPortRefreshed && !loading) {
+    //         console.log('no need to refresh view');
+    //         return;
+    //     }
+
+    //     const layerElements = this.tiles.flatMap(t => {
+    //         const geoTile = this.cache[t.zoom + "_" + t.tileX + "_" + t.tileY];
+    //         return geoTile ? geoTile.elements : [];
+    //     });
+
+    //     if(this.viewPortRefreshed) {
+    //         //if still loading, only display new features when there are more
+    //         //than already in the view.
+    //         console.log(`loading: ${loading} -- ${layerElements.length}/${this.getLayers().length}`);
+            
+    //         //## 2 different options:
+    //         //1) load double elements when certain percentage is not loaded
+    //         //2) wait with showing newly loaded elements until certain percentage is loaded
+            
+    //         // ## option 1
+    //         // if(!loading || this.getLayers().length/2 <= layerElements.length) {
+    //         //     console.log('refreshing tiles');
+    //         //     this.viewPortRefreshed = false;
+    //         //     this.clearLayers();
+    //         // }
+
+    //         // ## option 2
+    //         if(loading && this.getLayers().length/2 > layerElements.length)
+    //             return;
+    //         console.log('refreshing tiles');
+    //         this.viewPortRefreshed = false;
+    //         this.clearLayers();
+    //     }
+    //     layerElements.forEach(x => {
+    //         if(!this.hasLayer(x))
+    //             this.addLayer(x);
+    //     })
+    // };
+
+    // selectFeature = async (feature) => {
+    //     let body = {
+    //         mapId: this.blockId,
+    //         layerId: this.layerId,
+    //         geometryIds: [feature.properties.id],
+    //         returnType: "all",
+    //     };
+    //     try {
+    //         let result = await EllipsisApi.post(
+    //             "/geometry/ids",
+    //             body,
+    //             this.token
+    //         );
+    //         this.selectFeature({
+    //             size: result.size,
+    //             feature: result.result.features[0],
+    //         });
+    //     } catch (e) {
+    //         console.log(e);
+    //     }
+    // };
 }
 
-const createGeoJsonLayerStyle = (color, fillOpacity, weight) => {
-    return {
-        color: color ? color : "#3388ff",
-        weight: weight ? weight : 5,
-        fillOpacity: fillOpacity ? fillOpacity : 0.06,
-    };
-};
-
-const boundsToTiles = (bounds, zoom) => {
-    const xMin = Math.max(bounds.xMin, -180);
-    const xMax = Math.min(bounds.xMax, 180);
-    const yMin = Math.max(bounds.yMin, -85);
-    const yMax = Math.min(bounds.yMax, 85);
-
-    const zoomComp = Math.pow(2, zoom);
-    const comp1 = zoomComp / 360;
-    const pi = Math.PI;
-    const comp2 = 2 * pi;
-    const comp3 = pi / 4;
-
-    const tileXMin = Math.floor((xMin + 180) * comp1);
-    const tileXMax = Math.floor((xMax + 180) * comp1);
-    const tileYMin = Math.floor(
-        (zoomComp / comp2) *
-        (pi - Math.log(Math.tan(comp3 + (yMax / 360) * pi)))
-    );
-    const tileYMax = Math.floor(
-        (zoomComp / comp2) *
-        (pi - Math.log(Math.tan(comp3 + (yMin / 360) * pi)))
-    );
-
-    let tiles = [];
-    for(let x = Math.max(0, tileXMin - 1); x <= Math.min(2 ** zoom - 1, tileXMax + 1); x++) {
-        for(let y = Math.max(0, tileYMin - 1); y <= Math.min(2 ** zoom - 1, tileYMax + 1); y++) {
-            tiles.push({ zoom, tileX: x, tileY: y });
-        }
-    }
-    return tiles;
-};
-
-const getGeoJsons = async (
-    geometryLayer,
-    tiles,
-    token,
-    mapId,
-    pageSize,
-    layerId,
-    styleId,
-    lineWidth,
-    radius,
-    selectFeature,
-    filter,
-    date,
-    showLocation,
-    useMarkers
-) => {
-    let returnType = showLocation ? "center" : "geometry";
-    filter = filter ? (filter.length > 0 ? filter : null) : null;
-    // console.log(layerId)
-    let body = {
-        mapId: mapId,
-        returnType: returnType,
-        layerId: layerId,
-        zip: true,
-        pageSize: pageSize,
-        styleId: styleId,
-        propertyFilter: filter,
-    };
-
-    let result = [];
-
-    let chunkSize = 10;
-    for (let k = 0; k < tiles.length; k += chunkSize) {
-        body.tiles = tiles.slice(k, k + chunkSize);
-        try {
-            let res = await EllipsisApi.post("/geometry/tile", body, token);
-            result = result.concat(res);
-        } catch {
-            return null;
-        }
-    }
-
-    for (let j = 0; j < tiles.length; j++) {
-        let t = tiles[j];
-        let tileId =
-            t.tileId.zoom + "_" + t.tileId.tileX + "_" + t.tileId.tileY;
-
-        if (!geometryLayer.tiles[tileId]) {
-            geometryLayer.tiles[tileId] = {
-                size: 0,
-                amount: 0,
-                elements: [],
-                nextPageStart: null,
-            };
-        }
-        let tileInfo = geometryLayer.tiles[tileId];
-
-        tileInfo.date = date;
-        tileInfo.size = tileInfo.size + result[j].size;
-        tileInfo.amount = tileInfo.amount + result[j].result.features.length;
-        tileInfo.nextPageStart = result[j].nextPageStart;
-
-        let elements = [];
-        for (let l = 0; l < result[j].result.features.length; l++) {
-            let feature = result[j].result.features[l];
-            let newElements = featureToGeoJson(
-                feature,
-                feature.properties.color,
-                lineWidth,
-                radius,
-                500,
-                selectFeature,
-                useMarkers
-            );
-            elements = elements.concat(newElements);
-        }
-
-        tileInfo.elements = tileInfo.elements.concat(elements);
-    }
-};
-
-const featureToGeoJson = (
-    feature,
-    color,
-    width,
-    radius,
-    geometryLength,
-    onFeatureClick,
-    asMarker,
-    forceColor = false
-) => {
-    let alpha;
-
-    if (color) {
-        if (!forceColor) {
-            if (feature.properties && feature.properties.color) {
-                let colorString = feature.properties.color;
-                let valid = /^#?([A-Fa-f0-9]{2}){3,4}$/.test(colorString);
-
-                if (valid) {
-                    color = colorString;
-                }
-            }
-        }
-
-        if (color.length === 10) {
-            alpha = color.substring(8, 10);
-            alpha = parseFloat(parseInt(alpha, 16)) / 255;
-        } else {
-            alpha = 0.5;
-        }
-    }
-
-    let element;
-    const type = feature.geometry.type;
-    
-    if (type === "Polygon" || type === "MultiPolygon" || 
-    type === "LineString" || type === "MultiLineString") {
-        
-        element = [
-            L.geoJSON(feature, {
-                style: color ? (x) => {
-                    if(type === "Polygon" || type === "MultiPolygon")
-                        return createGeoJsonLayerStyle(color, alpha, width)
-                    else //TODO find out if width should also affect 8 here. And why no alpha value?
-                        return createGeoJsonLayerStyle(color, 1, 8)
-                } : null,
-                onEachFeature: onFeatureClick ? (feature, layer) => {
-                    layer.on({
-                        click: () => onFeatureClick(feature),
-                    });
-                } : null,
-                interactive: onFeatureClick ? true : false
-            }),
-        ];
-    } else if (type === "Point" || type === "MultiPoint") {
-        radius = Math.min(150 / geometryLength ** 0.5, radius);
-
-        const coords = feature.geometry.coordinates;
-        const isMultiMarker = Array.isArray(coords) && Array.isArray(coords[0]);
-        if (isMultiMarker === true) {
-            if (asMarker) {
-                element = coords.map((coord) => (
-                    L.marker([coord[1], coord[0]], {
-                        interactive: onFeatureClick ? true : false
-                    })
-                    .on("click", onFeatureClick ? () => onFeatureClick(feature) : null)
-                ));
-            } else {
-                element = coords.map((coord) => (
-                    L.circleMarker([coord[1], coord[0]], {
-                        radius: radius,
-                        opacity: 1,
-                        color: color,
-                        weight: 2,
-                        interactive: onFeatureClick ? true : false
-                    }).on("click", onFeatureClick ? () => onFeatureClick(feature) : null)
-                ));
-            }
-        } else {
-            if (asMarker) {
-                element = [ //TODO fix a wrong bracket here in react-leaflet package
-                    L.marker([coords[1], coords[0]], {
-                        interactive: onFeatureClick ? true : false
-                    })
-                    .on("click", onFeatureClick ? () => onFeatureClick(feature) : null)
-                ];
-            } else {
-                element = [
-                    L.circleMarker([coord[1], coord[0]], {
-                        radius: radius,
-                        opacity: 1,
-                        color: color,
-                        weight: 2,
-                        interactive: onFeatureClick ? true : false
-                    }).on("click", onFeatureClick ? () => onFeatureClick(feature) : null),
-                ];
-            }
-        }
-    }
-    return element;
-};
-
-const getLeafletMapBounds = (leafletMap) => {
-    if (!leafletMap || !leafletMap._zoom) return;
-
-    const screenBounds = leafletMap.getBounds();
-
-    let bounds = {
-        xMin: screenBounds.getWest(),
-        xMax: screenBounds.getEast(),
-        yMin: screenBounds.getSouth(),
-        yMax: screenBounds.getNorth(),
-    };
-
-    console.log(bounds);
-    console.log(leafletMap._zoom);
-
-    return { bounds: bounds, zoom: leafletMap._zoom };
-};

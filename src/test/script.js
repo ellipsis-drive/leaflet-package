@@ -12,16 +12,20 @@ function init() {
     tileLayer.addTo(map);
 
     // Raster layer
-    Ellipsis.RasterLayer(
-        '01104b4f-85a7-482c-9ada-11dbce171982',
-        0,
-        '01f63a0d-3f92-42d3-925d-b3bfaf6dd6a1',
-        21
-    ).addTo(map)
+    // Ellipsis.RasterLayer(
+    //     '01104b4f-85a7-482c-9ada-11dbce171982',
+    //     0,
+    //     '01f63a0d-3f92-42d3-925d-b3bfaf6dd6a1',
+    //     21
+    // ).addTo(map)
     
     Ellipsis.VectorLayer(
         '9649385a-70e5-455a-8013-eb3c052525f4',
-        '564b79df-6839-4efd-a219-e08883e65f95'
+        '564b79df-6839-4efd-a219-e08883e65f95',
+        {
+            maxMbPerTile: 32,
+            maxFeaturesPerTile: 1000
+        }
     ).addTo(map);
 
     // Ellipsis.VectorLayer(
