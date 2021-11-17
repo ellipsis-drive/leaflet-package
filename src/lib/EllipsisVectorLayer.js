@@ -13,9 +13,14 @@ class EllipsisVectorLayer extends L.geoJSON {
                     weight: feature.properties.weight
                 }
             },
-            pointToLayer: useMarkers ? undefined : (feature, latlng) => {
+            pointToLayer: useMarkers ? (feature, latlng) => {
+                const icon = new L.Icon.Default();
+                icon.options.shadowSize = [0,0];
+                //Unfortunately color support isn't directly possible without
+                //custom elements, css or a library.
+                return new L.marker(latlng, {icon});
+            } : (feature, latlng) => {
                 return L.circleMarker(latlng, {
-                    //TODO look how different styling works
                     radius: feature.properties.radius,
                     color: feature.properties.color,
                     fillColor: feature.properties.color,
@@ -26,7 +31,9 @@ class EllipsisVectorLayer extends L.geoJSON {
                 });
             },
             interactive: onFeatureClick ? true : false,
-            onEachFeature: onFeatureClick,
+            onEachFeature: onFeatureClick ? (feature, layer) => {
+                layer.on('click', (e) => onFeatureClick(feature, layer));
+            }: undefined,
             markersInheritOptions: true
         });
         this.id = `${blockId}_${layerId}`;
@@ -192,8 +199,6 @@ class EllipsisVectorLayer extends L.geoJSON {
             return null;
         }).filter(x => x);
         
-        // console.log("tiles:");
-        // console.log(tiles);
 
         if(tiles.length === 0) return false;
 
@@ -206,6 +211,7 @@ class EllipsisVectorLayer extends L.geoJSON {
             styleId: this.styleId,
             propertyFilter: (this.filter && this.filter > 0) ? this.filter : null,
         };
+
     
         //Get new geometry for the tiles
         let result = [];
@@ -255,23 +261,20 @@ class EllipsisVectorLayer extends L.geoJSON {
         const properties = geoJson.properties;
         const color = properties.color;
         const isHexColorFormat = /^#?([A-Fa-f0-9]{2}){3,4}$/.test(color);
-        //TODO add rgb(a) support
 
-        if(isHexColorFormat && color.length === 9)
+        if(isHexColorFormat && color.length === 9) {
             properties.fillOpacity = parseInt(color.substring(8,10), 16) / 25.5;
+            properties.color = color.substring(0,7);
+        }
         else properties.fillOpacity = 0.6;
 
         if(type === 'MultiPolygon' || type === 'Polygon') {
             properties.weight = weight;
         }
         else if(type === 'Point' || type === 'MultiPoint') {
-            //TODO: weight default on 8 for LineString and MultiLineString?
             properties.radius = radius;
             properties.weight = 2;
         }
-
-        if(isHexColorFormat && color.length === 9)
-            properties.color = color.substring(0,7);
     }
 
     boundsToTiles = (bounds, zoom) => {
