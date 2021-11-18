@@ -55,7 +55,7 @@ function init() {
         '1a24a1ee-7f39-4d21-b149-88df5a3b633a',
         '45c47c8a-035e-429a-9ace-2dff1956e8d9',
         { 
-            onFeatureClick: (l,f) => {console.log(l); console.log(f)},
+            // onFeatureClick: (l,f) => {console.log(l); console.log(f)},
             loadAll: true,
             styleId: 'a30d5d0e-26a3-43a7-9d23-638cef7600c4'
         }

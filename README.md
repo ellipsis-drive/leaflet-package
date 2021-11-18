@@ -69,7 +69,7 @@ Ellipsis.VectorLayer(
 
 | Name        | Description | 
 | ----------- | ----------- |
-| selectFeature        | A function to run on feature click, with as argument the clicked feature |
+| onFeatureClick        | A function to run on feature click, with as argument the clicked feature |
 | token        | Token of the user |
 | styleId        | Id of the layer style|
 | filter        | A property filter to use|
