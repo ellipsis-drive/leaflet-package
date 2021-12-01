@@ -1,7 +1,7 @@
 class EllipsisVectorLayer extends L.geoJSON {
 
     constructor(blockId, layerId, onFeatureClick, token,
-        styleId, filter, centerPoints, maxZoom, pageSize, maxMbPerTile,
+        styleId, style, filter, centerPoints, maxZoom, pageSize, maxMbPerTile,
         maxTilesInCache, maxFeaturesPerTile, radius, lineWidth, useMarkers, loadAll) {
         super([], {
             style: (feature) => {
@@ -44,6 +44,7 @@ class EllipsisVectorLayer extends L.geoJSON {
         this.onFeatureClick = onFeatureClick;
         this.token = token;
         this.styleId = styleId;
+        this.style = style;
         this.filter = filter;
         this.centerPoints = centerPoints;
         this.pageSize = Math.min(pageSize, 3000);

@@ -8,7 +8,7 @@ function init() {
         zoomOffset: -1,
         accessToken: 'pk.eyJ1IjoiZHV0Y2hqZWxseSIsImEiOiJja3Y0MXhsajc0ZHE3Mm5zNzhucTJiZXhmIn0.7UQPvzDakKqhRAUrUEQmxg'
     });
-    
+
     tileLayer.addTo(map);
 
     // Raster layer
@@ -18,7 +18,7 @@ function init() {
     //     '01f63a0d-3f92-42d3-925d-b3bfaf6dd6a1',
     //     21
     // ).addTo(map)
-    
+
     // Ellipsis.VectorLayer(
     //     '9649385a-70e5-455a-8013-eb3c052525f4',
     //     '564b79df-6839-4efd-a219-e08883e65f95',
@@ -41,25 +41,44 @@ function init() {
     //     token
     // ).addTo(map)
 
-    // Ellipsis.RasterLayer(
-    //     "01104b4f-85a7-482c-9ada-11dbce171982",
-    //     0,
-    //     "01f63a0d-3f92-42d3-925d-b3bfaf6dd6a1"
-    // ).addTo(map);
+    Ellipsis.RasterLayer(
+        "01104b4f-85a7-482c-9ada-11dbce171982",
+        0,
+        "01f63a0d-3f92-42d3-925d-b3bfaf6dd6a1"
+    ).addTo(map);
     // Ellipsis.VectorLayer(
     //     '9649385a-70e5-455a-8013-eb3c052525f4',
     //     '564b79df-6839-4efd-a219-e08883e65f95'
     // ).addTo(map);
 
+    // Ellipsis.VectorLayer(
+    //     '1a24a1ee-7f39-4d21-b149-88df5a3b633a',
+    //     '45c47c8a-035e-429a-9ace-2dff1956e8d9',
+    //     {
+    //         // onFeatureClick: (l,f) => {console.log(l); console.log(f)},
+    //         loadAll: true,
+    //         styleId: 'a30d5d0e-26a3-43a7-9d23-638cef7600c4'
+    //     }
+    // ).addTo(map);
+
+    // Ellipsis.RasterLayer(
+    //     '16bb1dc3-0e0c-49a8-80fb-7a77740abe1e', //blockID
+    //     '385040ca-2e92-4d38-b286-e2f325255edf', //captureID
+    //     '962aee0e-39c7-49f2-9176-52a11b87bee2', //visualizationID
+    //     {
+    //         //options
+    //         maxZoom: 21,
+    //     }
+    // ).addTo(map);
     Ellipsis.VectorLayer(
-        '1a24a1ee-7f39-4d21-b149-88df5a3b633a',
-        '45c47c8a-035e-429a-9ace-2dff1956e8d9',
-        { 
-            // onFeatureClick: (l,f) => {console.log(l); console.log(f)},
-            loadAll: true,
-            styleId: 'a30d5d0e-26a3-43a7-9d23-638cef7600c4'
+        'b8c7ac72-be8d-4183-8138-f83e54506be6', //blockId
+        'b071cd2f-064f-457d-8e9d-fe8ae212337a', //layerId
+        { //options
+            maxZoom: 21,
+            maxFeaturesPerTile: 400,
         }
     ).addTo(map);
+
 
     // Ellipsis.VectorLayer(
     //     'b8468235-31b5-4959-91a4-0e52a1d4feb6',
