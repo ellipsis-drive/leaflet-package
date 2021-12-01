@@ -9,7 +9,7 @@ All releases of this package are listed in the release list on github [here](htt
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <!-- Import ellipsis library -->
-<script src="path-to-library"></script>
+<script src="https://github.com/ellipsis-drive-internal/leaflet-package/releases/download/v2.0.0/ellipsis-leaflet-package-2.0.0.js"></script>
 
 ```
 
@@ -48,7 +48,7 @@ Ellipsis.VectorLayer(
 | ----------- | -----------|
 | blockId        | id of the block|
 | captureId     | id of the capture |
-| visualizationId     | id of the layer |
+| visualizationId     | id of the visualization |
 | maxZoom        | maxZoomlevel of the layer. Default 21.|
 | options | optional options object|
 
