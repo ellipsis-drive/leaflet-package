@@ -9,7 +9,7 @@ All releases of this package are listed in the release list on github [here](htt
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <!-- Import ellipsis library -->
-<script src="https://github.com/ellipsis-drive-internal/leaflet-package/releases/download/v2.0.0/ellipsis-leaflet-package-2.0.0.js"></script>
+<script src="https://github.com/ellipsis-drive-internal/leaflet-package/releases/download/v2.1.0/ellipsis-leaflet-package-2.1.0.js"></script>
 
 ```
 
