@@ -1,4 +1,4 @@
-// Build date: Wed Dec  1 17:02:40 CET 2021
+// Build date: Wed Dec  1 17:04:18 CET 2021
 
 "use strict"
 const apiUrl = 'https://api.ellipsis-drive.com/v1';
@@ -20,7 +20,7 @@ async function ellipsisApiManagerFetch(method, url, body, user) {
     if (user) {
         headers['Authorization'] = `Bearer ${user.token}`;
         if (user.mapId) {
-        urlAddition = `?mapId=${user.mapId}`;
+            urlAddition = `?mapId=${user.mapId}`;
         }
     }
 
@@ -40,59 +40,59 @@ async function ellipsisApiManagerFetch(method, url, body, user) {
 
     return await fetch(url, options)
         .then((response) => {
-        if (!response.ok) {
-            if (response.status === 429) {
-            alert(
-                `You made too many calls to this map and won't be able to use it for another minute. Contact the owner of this map to give you more bandwidth.`
-            );
+            if (!response.ok) {
+                if (response.status === 429) {
+                    alert(
+                        `You made too many calls to this map and won't be able to use it for another minute. Contact the owner of this map to give you more bandwidth.`
+                    );
+                }
             }
-        }
 
-        gottenResponse = response;
+            gottenResponse = response;
 
-        let contentType = response.headers.get('Content-Type');
+            let contentType = response.headers.get('Content-Type');
 
-        if (contentType) {
-            isText = contentType.includes('text');
-            isJson = contentType.includes('application/json');
-        } else {
-            isText = true;
-        }
+            if (contentType) {
+                isText = contentType.includes('text');
+                isJson = contentType.includes('application/json');
+            } else {
+                isText = true;
+            }
 
-        if (isJson) {
-            return response.json();
-        } else if (isText) {
-            return response.text();
-        } else {
-            return response.blob();
-        }
+            if (isJson) {
+                return response.json();
+            } else if (isText) {
+                return response.text();
+            } else {
+                return response.blob();
+            }
         })
         .then((result) => {
-        if (gottenResponse.status === 200) {
-            return result;
-        } else {
-            if (!isText) {
-            throw new CustomError(gottenResponse.status, result.message);
+            if (gottenResponse.status === 200) {
+                return result;
             } else {
-            throw new CustomError(gottenResponse.status, result);
+                if (!isText) {
+                    throw new CustomError(gottenResponse.status, result.message);
+                } else {
+                    throw new CustomError(gottenResponse.status, result);
+                }
             }
-        }
-    });
+        });
 }
 
 
-const EllipsisApi = {
+window.EllipsisApi = {
     apiUrl: apiUrl,
     post: (url, body, user) => {
         return ellipsisApiManagerFetch('POST', url, body, user);
     },
     login: (username, password) => {
-        return ellipsisApiManagerFetch('POST', '/account/login', {username, password});
+        return ellipsisApiManagerFetch('POST', '/account/login', { username, password });
     },
     getMetadata: (blockId, includeDeleted) => {
         let body;
-        if(includeDeleted) body = {mapId: blockId, includeDeleted};
-        else body = {mapId: blockId};
+        if (includeDeleted) body = { mapId: blockId, includeDeleted };
+        else body = { mapId: blockId };
 
         return ellipsisApiManagerFetch('POST', '/metadata', body);
     }
@@ -503,7 +503,7 @@ class EllipsisVectorLayer extends L.geoJSON {
     // };
 }
 
-
+window.EllipsisVectorLayer = EllipsisRasterLayer;
 class EllipsisRasterLayer extends L.tileLayer {
     constructor(blockId, captureId, visualizationId, maxZoom = 18, token) {
         let url = `${EllipsisApi.apiUrl}/tileService/${blockId}/${captureId}/${visualizationId}/{z}/{x}/{y}`;
@@ -518,7 +518,9 @@ class EllipsisRasterLayer extends L.tileLayer {
         });
     }
 }
-const Ellipsis = {
+
+window.EllipsisRasterLayer = EllipsisRasterLayer;
+window.Ellipsis = {
     RasterLayer: (blockId, captureId, visualizationId, maxZoom = 21, options = {}) => {
         return new EllipsisRasterLayer(
             blockId,

@@ -12,3 +12,5 @@ class EllipsisRasterLayer extends L.tileLayer {
         });
     }
 }
+
+window.EllipsisRasterLayer = EllipsisRasterLayer;

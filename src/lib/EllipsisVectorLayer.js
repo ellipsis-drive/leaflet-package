@@ -404,3 +404,4 @@ class EllipsisVectorLayer extends L.geoJSON {
     // };
 }
 
+window.EllipsisVectorLayer = EllipsisRasterLayer;
