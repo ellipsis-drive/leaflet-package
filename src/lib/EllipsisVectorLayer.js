@@ -160,7 +160,8 @@ class EllipsisVectorLayer extends L.geoJSON {
             layerId: this.layerId,
             zip: true,
             pageSize: Math.min(3000, this.pageSize),
-            styleId: this.styleId
+            styleId: this.styleId,
+            style: this.style
         };
 
         try {
@@ -210,6 +211,7 @@ class EllipsisVectorLayer extends L.geoJSON {
             zip: true,
             pageSize: Math.min(3000, this.pageSize),
             styleId: this.styleId,
+            style: this.style,
             propertyFilter: (this.filter && this.filter > 0) ? this.filter : null,
         };
 
