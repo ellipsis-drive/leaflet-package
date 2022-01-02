@@ -1,3 +1,5 @@
+import EllipsisApi from "./EllipsisApi";
+
 class EllipsisVectorLayer extends L.geoJSON {
 
     constructor(blockId, layerId, onFeatureClick, token,
@@ -404,4 +406,4 @@ class EllipsisVectorLayer extends L.geoJSON {
     // };
 }
 
-window.EllipsisVectorLayer = EllipsisRasterLayer;
+export default EllipsisVectorLayer;

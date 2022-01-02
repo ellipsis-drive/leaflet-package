@@ -78,7 +78,7 @@ async function ellipsisApiManagerFetch(method, url, body, user) {
 }
 
 
-window.EllipsisApi = {
+export default {
     apiUrl: apiUrl,
     post: (url, body, user) => {
         return ellipsisApiManagerFetch('POST', url, body, user);

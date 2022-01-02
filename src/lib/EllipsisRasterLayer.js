@@ -1,3 +1,5 @@
+import EllipsisApi from "./EllipsisApi";
+
 class EllipsisRasterLayer extends L.tileLayer {
     constructor(blockId, captureId, visualizationId, maxZoom = 18, token) {
         let url = `${EllipsisApi.apiUrl}/tileService/${blockId}/${captureId}/${visualizationId}/{z}/{x}/{y}`;
@@ -13,4 +15,4 @@ class EllipsisRasterLayer extends L.tileLayer {
     }
 }
 
-window.EllipsisRasterLayer = EllipsisRasterLayer;
+export default EllipsisRasterLayer;
