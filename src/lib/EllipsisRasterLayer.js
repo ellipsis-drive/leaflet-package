@@ -1,15 +1,13 @@
-import EllipsisApi from "./EllipsisApi";
+import { RasterLayerUtil } from "ellipsis-js-util";
 
 class EllipsisRasterLayer extends L.tileLayer {
-    constructor(blockId, captureId, visualizationId, maxZoom = 18, token) {
-        let url = `${EllipsisApi.apiUrl}/tileService/${blockId}/${captureId}/${visualizationId}/{z}/{x}/{y}`;
-        if (token) {
-            url = url + '?token=' + token;
-        }
 
-        super(url, {
-            maxZoom,
-            id: `${blockId}_${captureId}_${visualizationId}`,
+    getLeafletLayer = () => this;
+
+    constructor(options) {
+        super(RasterLayerUtil.getSlippyMapUrl(options), {
+            maxZoom: options.maxZoom,
+            id: `${options.blockId}_${options.captureId}_${options.visualizationId}`,
             tileSize: 256,
         });
     }

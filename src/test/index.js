@@ -1,4 +1,4 @@
-import Ellipsis from '../lib'
+import { EllipsisVectorLayer, EllipsisRasterLayer } from '../lib'
 import token from './token'
 
 let map = L.map('map').setView([52.373527706597514, 4.633205849096186], 17);
@@ -43,25 +43,31 @@ tileLayer.addTo(map);
 //     token
 // ).addTo(map)
 
-Ellipsis.RasterLayer(
-    "01104b4f-85a7-482c-9ada-11dbce171982",
-    0,
-    "01f63a0d-3f92-42d3-925d-b3bfaf6dd6a1"
-).addTo(map);
+// Ellipsis.RasterLayer(
+//     "01104b4f-85a7-482c-9ada-11dbce171982",
+//     0,
+//     "01f63a0d-3f92-42d3-925d-b3bfaf6dd6a1"
+// ).addTo(map);
 // Ellipsis.VectorLayer(
 //     '9649385a-70e5-455a-8013-eb3c052525f4',
 //     '564b79df-6839-4efd-a219-e08883e65f95'
 // ).addTo(map);
 
-Ellipsis.VectorLayer(
-    '1a24a1ee-7f39-4d21-b149-88df5a3b633a',
-    '45c47c8a-035e-429a-9ace-2dff1956e8d9',
-    {
-        // onFeatureClick: (l,f) => {console.log(l); console.log(f)},
-        loadAll: true,
-        styleId: 'a30d5d0e-26a3-43a7-9d23-638cef7600c4'
-    }
-).addTo(map);
+const borders = new EllipsisVectorLayer({
+    blockId: '1a24a1ee-7f39-4d21-b149-88df5a3b633a',
+    layerId: '45c47c8a-035e-429a-9ace-2dff1956e8d9',
+    loadAll: true,
+    styleId: 'a30d5d0e-26a3-43a7-9d23-638cef7600c4'
+});
+borders.addTo(map);
+
+
+const someRaster = new EllipsisRasterLayer({
+    blockId: '16bb1dc3-0e0c-49a8-80fb-7a77740abe1e',
+    captureId: '385040ca-2e92-4d38-b286-e2f325255edf',
+    visualizationId: '962aee0e-39c7-49f2-9176-52a11b87bee2'
+});
+someRaster.addTo(map);
 
 // Ellipsis.RasterLayer(
 //     '16bb1dc3-0e0c-49a8-80fb-7a77740abe1e', //blockID
