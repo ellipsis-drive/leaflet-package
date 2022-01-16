@@ -2,7 +2,11 @@ import EllipsisVectorLayer from './EllipsisVectorLayer';
 import EllipsisRasterLayer from './EllipsisRasterLayer';
 import EllipsisApi from 'ellipsis-js-util';
 
-const Ellipsis = {
+/**
+ * Added for backward compatibility
+ * @deprecated use EllipsisVectorLayer and EllipsisRasterLayer imports instead.
+ */
+export default {
     RasterLayer: (blockId, captureId, visualizationId, maxZoom = 21, options) => {
         return new EllipsisRasterLayer({ blockId, captureId, visualizationId, maxZoom, ...options });
     },
@@ -12,5 +16,4 @@ const Ellipsis = {
     EllipsisApi
 }
 
-export { EllipsisVectorLayer, EllipsisRasterLayer }
-export default Ellipsis;
+export { EllipsisVectorLayer, EllipsisRasterLayer, EllipsisApi }

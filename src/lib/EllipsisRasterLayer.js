@@ -7,8 +7,7 @@ class EllipsisRasterLayer extends L.tileLayer {
     constructor(options) {
         super(RasterLayerUtil.getSlippyMapUrl(options), {
             maxZoom: options.maxZoom,
-            id: `${options.blockId}_${options.captureId}_${options.visualizationId}`,
-            tileSize: 256,
+            tileSize: 256
         });
     }
 }

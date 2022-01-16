@@ -2,14 +2,15 @@ import { VectorLayerUtil } from 'ellipsis-js-util';
 
 class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
 
-    //Styling keys (and their aliases) that leaflet uses.
-    styleKeys = {
-        radius: [],
-        weight: ['width'],
-        color: ['borderColor'],
-        opacity: [],
-        fillColor: [],
-        fillOpacity: []
+    loadingOptions = {
+        styleKeys: {
+            radius: [],
+            weight: ['width'],
+            color: ['borderColor'],
+            opacity: [],
+            fillColor: [],
+            fillOpacity: []
+        }
     }
 
     constructor(options = {}) {
@@ -18,9 +19,9 @@ class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
         this.leafletLayer = L.geoJSON([], {
             style: (feature) => feature.properties.compiledStyle,
             markersInheritOptions: true,
-            interactive: !!this.onFeatureClick,
-            onEachFeature: this.onFeatureClick ? (feature, layer) => {
-                layer.on('click', (e) => this.onFeatureClick(feature, layer));
+            interactive: !!this.options.onFeatureClick,
+            onEachFeature: this.options.onFeatureClick ? (feature, layer) => {
+                layer.on('click', (e) => this.options.onFeatureClick(feature, layer));
             } : undefined,
             pointToLayer: this.pointFeatureToLayer,
         });
@@ -35,11 +36,10 @@ class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
     handleAddedToMap = () => {
         this.update();
 
-        if (this.loadAll) return;
+        if (this.options.loadAll) return;
 
         this.leafletLayer._map.on("zoom", (x) => {
             this.update();
-            console.log('zoom');
         });
 
         this.leafletLayer._map.on("moveend", (x) => {
@@ -47,12 +47,12 @@ class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
         });
 
         this.leafletLayer._map.on("remove", (x) => {
-            this.destroy();
+            await this.clearLayer();
         });
     }
 
     pointFeatureToLayer = (feature, latlng) => {
-        if (this.useMarkers) {
+        if (this.options.useMarkers) {
             const icon = new L.Icon.Default();
             icon.options.shadowSize = [0, 0];
             return new L.marker(latlng, { icon });
@@ -65,7 +65,7 @@ class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
             fillOpacity: feature.properties.fillOpacity,
             opacity: 1,
             weight: feature.properties.weight,
-            interactive: this.onFeatureClick ? true : false
+            interactive: this.options.onFeatureClick ? true : false
         });
 
     }
