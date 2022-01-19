@@ -1,16 +1,16 @@
-class EllipsisRasterLayer extends L.tileLayer {
-    constructor(blockId, captureId, visualizationId, maxZoom = 18, token) {
-        let url = `${EllipsisApi.apiUrl}/tileService/${blockId}/${captureId}/${visualizationId}/{z}/{x}/{y}`;
-        if (token) {
-            url = url + '?token=' + token;
-        }
+import getEllipsisUtilObject from "./getEllipsisUtilObject";
+const RasterLayerUtil = getEllipsisUtilObject('RasterLayerUtil');
 
-        super(url, {
-            maxZoom,
-            id: `${blockId}_${captureId}_${visualizationId}`,
-            tileSize: 256,
+class EllipsisRasterLayer extends L.tileLayer {
+
+    getLeafletLayer = () => this;
+
+    constructor(options) {
+        super(RasterLayerUtil.getSlippyMapUrl(options), {
+            maxZoom: options.maxZoom,
+            tileSize: 256
         });
     }
 }
 
-window.EllipsisRasterLayer = EllipsisRasterLayer;
+export default EllipsisRasterLayer;
