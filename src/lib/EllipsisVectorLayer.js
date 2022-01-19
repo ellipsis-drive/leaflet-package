@@ -1,4 +1,5 @@
-import { VectorLayerUtil } from 'ellipsis-js-util';
+import getEllipsisUtilObject from './getEllipsisUtilObject';
+const VectorLayerUtil = getEllipsisUtilObject('VectorLayerUtil');
 
 class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
 
@@ -47,7 +48,7 @@ class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
         });
 
         this.leafletLayer._map.on("remove", (x) => {
-            await this.clearLayer();
+            this.clearLayer();
         });
     }
 

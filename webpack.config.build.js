@@ -1,15 +1,18 @@
 const path = require('path');
 
 module.exports = {
-    entry: './src/lib/index.js',
-    output: {
-      publicPath: '',
-      path: path.resolve(__dirname, 'build'),
-      library: {
-        name: 'ellipsis',
-        type: 'umd'
-      },
-      filename: 'arcgisjs-ellipsis.js',
+  entry: './src/lib/index.js',
+  output: {
+    publicPath: '',
+    path: path.resolve(__dirname, 'build'),
+    library: {
+      name: 'arcgisjsEllipsis',
+      type: 'umd'
     },
-    mode: 'production'
+    filename: 'arcgisjs-ellipsis.js',
+  },
+  mode: 'production',
+  externals: {
+    'ellipsis-js-util': 'ellipsis-js-util'
+  }
 };

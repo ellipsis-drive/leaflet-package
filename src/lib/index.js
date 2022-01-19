@@ -1,6 +1,8 @@
 import EllipsisVectorLayer from './EllipsisVectorLayer';
 import EllipsisRasterLayer from './EllipsisRasterLayer';
-import EllipsisApi from 'ellipsis-js-util';
+import getEllipsisUtilObject from './getEllipsisUtilObject';
+
+const EllipsisApi = getEllipsisUtilObject('EllipsisApi');
 
 /**
  * Added for backward compatibility
