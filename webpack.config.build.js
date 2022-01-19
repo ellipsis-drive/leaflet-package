@@ -6,10 +6,10 @@ module.exports = {
     publicPath: '',
     path: path.resolve(__dirname, 'build'),
     library: {
-      name: 'arcgisjsEllipsis',
+      name: 'leafletEllipsis',
       type: 'umd'
     },
-    filename: 'arcgisjs-ellipsis.js',
+    filename: 'leaflet-ellipsis.js',
   },
   mode: 'production',
   externals: {
