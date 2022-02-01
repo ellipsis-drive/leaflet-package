@@ -76,9 +76,8 @@ new leafletEllipsis.EllipsisVectorLayer({
 | maxMbPerTile       | The maximum mb to load per tile. Default 16mb.                           |
 | maxTilesInCache    | The number of tiles to keep in cache. Default 500.                       |
 | maxFeaturesPerTile | The maximum number of features to load per tile. Default 200.            |
-| radius             | The radius of the points in the layer. Default 15.                       |
-| lineWidth          | The width/weight of the lines in the layer. Default 5.                   |
 | useMarkers         | If set to true, points will be displayed as markers. Default false.      |
+| fetchInterval      | The interval in ms between finishing a request and starting a new one.   |
 
 _note_ for the style object, refer to this documentation about it: https://app.ellipsis-drive.com/developer/javascript/documentation#POST%20geometryLayers%2FaddStyle.
 
