@@ -53,13 +53,13 @@ tileLayer.addTo(map);
 //     '564b79df-6839-4efd-a219-e08883e65f95'
 // ).addTo(map);
 
-const borders = new EllipsisVectorLayer({
-    blockId: '1a24a1ee-7f39-4d21-b149-88df5a3b633a',
-    layerId: '45c47c8a-035e-429a-9ace-2dff1956e8d9',
-    loadAll: true,
-    styleId: 'a30d5d0e-26a3-43a7-9d23-638cef7600c4'
-});
-borders.addTo(map);
+// const borders = new EllipsisVectorLayer({
+//     blockId: '1a24a1ee-7f39-4d21-b149-88df5a3b633a',
+//     layerId: '45c47c8a-035e-429a-9ace-2dff1956e8d9',
+//     loadAll: true,
+//     styleId: 'a30d5d0e-26a3-43a7-9d23-638cef7600c4'
+// });
+// borders.addTo(map);
 
 
 const someRaster = new EllipsisRasterLayer({

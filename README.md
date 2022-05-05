@@ -14,8 +14,8 @@ All releases of this package are listed in the release list on github [here](htt
 />
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <!-- Import ellipsis library -->
-<script src="https://github.com/ellipsis-drive/ellipsis-js-util/releases/download/1.0.1/ellipsis-js-util-1.0.1.js"></script>
-<script src="https://github.com/ellipsis-drive/leaflet-package/releases/download/3.0.0/leaflet-ellipsis-3.0.0.js"></script>
+<script src="https://github.com/ellipsis-drive/ellipsis-js-util/releases/download/1.1.0/ellipsis-js-util-1.1.0.js"></script>
+<script src="https://github.com/ellipsis-drive/leaflet-package/releases/download/3.1.0/leaflet-ellipsis-3.1.0.js"></script>
 ```
 
 **with npm**
