@@ -14,8 +14,8 @@ All releases of this package are listed in the release list on github [here](htt
 />
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <!-- Import ellipsis library -->
-<script src="https://github.com/ellipsis-drive/ellipsis-js-util/releases/download/1.0.1/ellipsis-js-util-1.0.1.js"></script>
-<script src="https://github.com/ellipsis-drive/leaflet-package/releases/download/3.0.0/leaflet-ellipsis-3.0.0.js"></script>
+<script src="https://github.com/ellipsis-drive/ellipsis-js-util/releases/download/1.1.0/ellipsis-js-util-1.1.0.js"></script>
+<script src="https://github.com/ellipsis-drive/leaflet-package/releases/download/3.1.0/leaflet-ellipsis-3.1.0.js"></script>
 ```
 
 **with npm**
@@ -33,16 +33,16 @@ const map = L.map("map", {
 
 // Raster layer
 new leafletEllipsis.EllipsisRasterLayer({
-  blockId: blockId,
-  captureId: captureId,
-  visualizationId: visualizationId,
+  pathId: pathId,
+  timestampId: timestampId,
+  layer: layerId,
   maxZoom: 21,
   token: yourToken,
 }).addTo(map);
 
 // Vector layer
 new leafletEllipsis.EllipsisVectorLayer({
-  blockId: blockId,
+  pathId: pathId,
   layerId: layerId,
   maxZoom: 21,
   token: yourToken,
@@ -51,19 +51,19 @@ new leafletEllipsis.EllipsisVectorLayer({
 
 #### RasterLayer options
 
-| Name            | Description                            |
-| --------------- | -------------------------------------- |
-| blockId         | id of the block                        |
-| captureId       | id of the capture                      |
-| visualizationId | id of the visualization                |
-| maxZoom         | maxZoomlevel of the layer. Default 21. |
-| token           | token of the user                      |
+| Name        | Description                              |
+| ----------- | ---------------------------------------- |
+| pathId      | id of the path                           |
+| timestampId | id of the timestamp                      |
+| layer       | id of a layer or an object describing it |
+| maxZoom     | maxZoomlevel of the layer. Default 21.   |
+| token       | token of the user                        |
 
 #### VectorLayer options
 
 | Name               | Description                                                              |
 | ------------------ | ------------------------------------------------------------------------ |
-| blockId            | Id of the block                                                          |
+| layerId            | Id of the layer                                                          |
 | layerId            | Id of the layer                                                          |
 | onFeatureClick     | A function to run on feature click, with as argument the clicked feature |
 | token              | Token of the user                                                        |
@@ -111,13 +111,13 @@ token: string; //token to use in other api calls
 expires: number; //expiration time in milliseconds
 ```
 
-#### EllipsisApi.getInfo description
+#### EllipsisApi.getPath description
 
 **parameters**
 | name | description |
 | -- | -- |
-| pathId | The id of the block, folder or layer. |
+| pathId | The id of the path. |
 | user | (Optional) An user object which can contain a token like `user: {token: mytoken}` |
 
 **return value**
-It returns JSON, which depends on the type of the specified object.
+It returns JSON, which contains metadata of the the specified path in your drive.
