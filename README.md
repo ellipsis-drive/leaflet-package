@@ -33,18 +33,12 @@ const map = L.map("map", {
 
 // Raster layer
 new leafletEllipsis.EllipsisRasterLayer({
-  pathId: pathId,
-  timestampId: timestampId,
-  layer: layerId,
-  maxZoom: 21,
-  token: yourToken,
+  pathId: pathId,  token: yourToken,
 }).addTo(map);
 
 // Vector layer
 new leafletEllipsis.EllipsisVectorLayer({
   pathId: pathId,
-  layerId: layerId,
-  maxZoom: 21,
   token: yourToken,
 }).addTo(map);
 ```
@@ -55,7 +49,7 @@ new leafletEllipsis.EllipsisVectorLayer({
 | ----------- | ---------------------------------------- |
 | pathId      | id of the path                           |
 | timestampId | id of the timestamp                      |
-| layer       | id of a layer or an object describing it |
+| style       | id of a style or an object describing it |
 | maxZoom     | maxZoomlevel of the layer. Default 21.   |
 | token       | token of the user                        |
 
@@ -63,12 +57,11 @@ new leafletEllipsis.EllipsisVectorLayer({
 
 | Name               | Description                                                              |
 | ------------------ | ------------------------------------------------------------------------ |
-| layerId            | Id of the layer                                                          |
-| layerId            | Id of the layer                                                          |
+| pathId            | Id of the path                                                          |
+| timestampId            | Id of the timestamp                                                          |
+| style       | id of a style or an object describing it |
 | onFeatureClick     | A function to run on feature click, with as argument the clicked feature |
 | token              | Token of the user                                                        |
-| styleId            | Id of the layer style                                                    |
-| style              | (Optional) Object with style properties\*                                |
 | filter             | A property filter to use                                                 |
 | maxZoom            | maxZoomlevel of the layer. Default 21.                                   |
 | centerPoints       | Boolean whether to render only center points. Default false.             |
