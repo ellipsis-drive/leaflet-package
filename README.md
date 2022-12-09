@@ -33,7 +33,7 @@ const map = L.map("map", {
 
 // Raster layer
 new leafletEllipsis.EllipsisRasterLayer({
-  pathId: pathId,  token: yourToken,
+  pathId: pathId, timestampId:timestampId, style:styleId, zoom:zoom  token: yourToken,
 }).addTo(map);
 
 // Vector layer
@@ -42,6 +42,20 @@ new leafletEllipsis.EllipsisVectorLayer({
   token: yourToken,
 }).addTo(map);
 ```
+
+The timestampId and style are required for raster layers, you can use AsyncEllipsisRasterLayer in order to make use of defaults suggested by the server.
+
+```
+const createEllipsisRasterLayer = async () => {
+  const someRaster = await AsyncEllipsisRasterLayer({
+    pathId: pathId,
+  });
+  someRaster.addTo(map);
+};
+
+createEllipsisRasterLayer();
+```
+In this case only the pathId is required.
 
 #### RasterLayer options
 
