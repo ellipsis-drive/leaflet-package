@@ -45,7 +45,7 @@ new leafletEllipsis.EllipsisVectorLayer({
 
 The timestampId and style are required for raster layers, you can use AsyncEllipsisRasterLayer in order to make use of defaults suggested by the server.
 
-```
+```js
 const createEllipsisRasterLayer = async () => {
   const someRaster = await AsyncEllipsisRasterLayer({
     pathId: pathId,
