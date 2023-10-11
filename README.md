@@ -81,7 +81,7 @@ In this case only the pathId is required.
 | centerPoints       | Boolean whether to render only center points. Default false.             |
 | pageSize           | Size to retreive per step. Default 25, max 3000.                         |
 | maxMbPerTile       | The maximum mb to load per tile. Default 16mb.                           |
-| maxTilesInCache    | The number of tiles to keep in cache. Default 500.                       |
+| maxRenderTiles    | The number of tiles to render in the view. Default 100.                       |
 | maxFeaturesPerTile | The maximum number of features to load per tile. Default 200.            |
 | useMarkers         | If set to true, points will be displayed as markers. Default false.      |
 | fetchInterval      | The interval in ms between finishing a request and starting a new one.   |
