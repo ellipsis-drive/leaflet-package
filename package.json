@@ -1,6 +1,6 @@
 {
   "name": "leaflet-ellipsis",
-  "version": "3.1.1",
+  "version": "3.1.3",
   "description": "Use Ellipsis Drive layers in leaflet projects.",
   "private": false,
   "keywords": [
@@ -30,6 +30,6 @@
     "webpack-cli": "^4.9.1"
   },
   "dependencies": {
-    "ellipsis-js-util": "^1.3.1"
+    "ellipsis-js-util": "^1.1.0"
   }
 }

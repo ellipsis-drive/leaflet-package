@@ -4,27 +4,28 @@ import {
   AsyncEllipsisRasterLayer,
 } from "../lib";
 
-let map = L.map("map").setView([52.373527706597514, 4.633205849096186], 17);
+var map = L.map("map").setView([-27.3416, 153.074], 13);
 
-const createEllipsisRasterLayer = async () => {
-  const someRaster = await AsyncEllipsisRasterLayer({
-    pathId: "28fb0f5f-e367-4265-b84b-1b8f1a8a6409",
-  });
-  someRaster.addTo(map);
-};
-
-createEllipsisRasterLayer();
-
-L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 19,
+var tiles = L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png", {
   attribution:
-    '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
 }).addTo(map);
 
-const someVector = new EllipsisVectorLayer({
-  pathId: "2109c37a-d549-45dd-858e-7eddf1bd7c22",
-  timestampId: "1e8061f0-6c22-4803-8f2c-1b60fa7f7ae6",
-  style: "3a438c2e-b3ea-4d23-ae18-45541d105bf2",
-  zoom: 15,
-});
-someVector.addTo(map);
+// new leafletEllipsis.EllipsisRasterLayer({
+// 	pathId: '2cdef8fa-0b50-40a6-a7be-6649c761a2e0',
+// 	timestampId: '43ba34a9-f1ab-47bd-adaf-f4ba9d283bda',
+// 	style: '3d881ff4-c0d7-48cc-ba8d-39eb92bc3a5c',
+// 	// zoom: 20,
+// 	token: ''
+// }).addTo(map);
+
+// Vector layer
+
+//8a11c27b-74c3-4570-bcd0-64829f7cd311
+//"6d8772b8-a399-4a4f-8744-bd3769cef1ed"
+new EllipsisVectorLayer({
+  pathId: "6d8772b8-a399-4a4f-8744-bd3769cef1ed",
+  maxFeaturesPerTile: 200,
+  token:
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1dWlkIjoiOTExM2FmMmItOTQzZi00Njg5LWI1ZjQtZTU3NTE2N2Q1YTM4Iiwic291cmNlIjoiZ29vZ2xlX29wZW5faWQiLCJpYXQiOjE2OTk1MjIwNTMsImV4cCI6MTcwMjIwMDQ1M30.p4fAbY1-NH9L2kQX86NrHvrmD02laY4f7NhEHXB-MYU",
+}).addTo(map);

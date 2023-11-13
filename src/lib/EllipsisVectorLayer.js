@@ -64,11 +64,11 @@ class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
 
     return L.circleMarker(latlng, {
       radius: feature.properties.radius,
-      color: feature.properties.color,
-      fillColor: feature.properties.color,
-      fillOpacity: feature.properties.fillOpacity,
+      color: feature.properties.compiledStyle.borderColor.slice(0, 7),
+      fillColor: feature.properties.color.slice(0, 7),
+      fillOpacity: feature.properties.compiledStyle.fillOpacity,
       opacity: 1,
-      weight: feature.properties.weight,
+      weight: feature.properties.compiledStyle.width,
       interactive: this.options.onFeatureClick ? true : false,
     });
   };
@@ -76,9 +76,12 @@ class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
   updateView = () => {
     const features = this.getFeatures();
     if (!this.printedFeatureIds.length) this.leafletLayer.clearLayers();
-    this.leafletLayer.addData(
-      features.filter((x) => !this.printedFeatureIds.includes(x.properties.id))
+
+    const adding = features.filter(
+      (x) => !this.printedFeatureIds.includes(x.properties.id)
     );
+
+    this.leafletLayer.addData(adding);
     features.forEach((x) => this.printedFeatureIds.push(x.properties.id));
   };
 
