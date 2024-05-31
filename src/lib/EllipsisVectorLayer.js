@@ -15,9 +15,13 @@ class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
 
   constructor(options = {}) {
     super(options);
-
     this.leafletLayer = L.geoJSON([], {
-      style: (feature) => feature.properties.compiledStyle,
+      style: (feature) => {
+        return {
+          ...feature.properties.compiledStyle,
+          color: feature.properties.compiledStyle.borderColor,
+        };
+      },
       markersInheritOptions: true,
       interactive: !!this.options.onFeatureClick,
       onEachFeature: this.options.onFeatureClick
