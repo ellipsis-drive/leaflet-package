@@ -57,6 +57,9 @@ createEllipsisRasterLayer();
 ```
 In this case only the pathId is required.
 
+#### Obtaining tokens
+To use layers that are not set to public or link sharing you need to pass a token as a parameter. See [here](https://docs.ellipsis-drive.com/developers/authentication-options) for how to obtain such a token.
+
 #### RasterLayer options
 
 | Name        | Description                              |
@@ -102,21 +105,6 @@ _note_ for the style object, refer to this documentation about it: https://app.e
 
 ### EllipsisApi functions
 
-#### EllipsisApi.login description
-
-**parameters**
-| name | description |
-| -- | -- |
-| username | The username of your ellipsis-drive account |
-| password | The password of your ellipsis-drive account |
-| validFor | (Optional) The number of second the access token will be valid for. Default 86400 (24 hours). |
-
-**return value**
-
-```ts
-token: string; //token to use in other api calls
-expires: number; //expiration time in milliseconds
-```
 
 #### EllipsisApi.getPath description
 
