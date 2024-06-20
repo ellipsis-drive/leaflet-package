@@ -89,6 +89,7 @@ _note_ for the style object, refer to [this documentation about it](https://docs
 | maxFeaturesPerTile | The maximum number of features to load per tile. Default 200.            |
 | useMarkers         | If set to true, points will be displayed as markers. Default false.      |
 | fetchInterval      | The interval in ms between finishing a request and starting a new one.   |
+| loadAll      | Boolean whehter to keep loading features indefinitely. Default false.   |
 
 _note_ for the style object, refer to [this documentation about it](https://docs.ellipsis-drive.com/developers/api-v3/path-vector/styles/add-style).
 
