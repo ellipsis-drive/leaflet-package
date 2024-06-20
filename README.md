@@ -80,6 +80,7 @@ _note_ for the style object, refer to [this documentation about it](https://docs
 | timestampId            | Id of the timestamp                                                          |
 | style       | id of a style or an object describing it |
 | onFeatureClick     | A function to run on feature click, with as argument the clicked feature |
+| onFeatureHover     | A function to run on feature hover, with as argument the clicked feature and the event              |
 | token              | Token of the user                                                        |
 | filter             | A property filter to use                                                 |
 | zoom            | zoomlevel of the laye, if not given uses the zoom as specified in the layer metadata.                                   |
