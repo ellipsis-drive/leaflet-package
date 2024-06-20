@@ -82,8 +82,7 @@ _note_ for the style object, refer to [this documentation about it](https://docs
 | onFeatureClick     | A function to run on feature click, with as argument the clicked feature |
 | token              | Token of the user                                                        |
 | filter             | A property filter to use                                                 |
-| maxZoom            | maxZoomlevel of the layer. Default 21.                                   |
-| centerPoints       | Boolean whether to render only center points. Default false.             |
+| zoom            | zoomlevel of the laye, if not given uses the zoom as specified in the layer metadata.                                   |
 | pageSize           | Size to retreive per step. Default 25, max 3000.                         |
 | maxMbPerTile       | The maximum mb to load per tile. Default 16mb.                           |
 | maxRenderTiles    | The number of tiles to render in the view. Default 100.                       |
