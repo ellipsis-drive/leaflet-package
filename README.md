@@ -47,7 +47,7 @@ The timestampId and style are required for raster layers, you can use AsyncEllip
 
 ```js
 const createEllipsisRasterLayer = async () => {
-  const someRaster = await AsyncEllipsisRasterLayer({
+  const someRaster = await leafletEllipsis.AsyncEllipsisRasterLayer({
     pathId: pathId,
   });
   someRaster.addTo(map);
