@@ -2,16 +2,7 @@ import getEllipsisUtilObject from "./getEllipsisUtilObject";
 const VectorLayerUtil = getEllipsisUtilObject("VectorLayerUtil");
 
 class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
-  loadingOptions = {
-    styleKeys: {
-      radius: [],
-      weight: ["width"],
-      color: ["borderColor"],
-      opacity: [],
-      fillColor: [],
-      fillOpacity: [],
-    },
-  };
+  loadingOptions = {};
 
   constructor(options = {}) {
     super(options);
@@ -75,12 +66,7 @@ class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
     }
 
     return L.circleMarker(latlng, {
-      radius: feature.properties.radius,
-      color: feature.properties.compiledStyle.borderColor.slice(0, 7),
-      fillColor: feature.properties.color.slice(0, 7),
-      fillOpacity: feature.properties.compiledStyle.fillOpacity,
-      opacity: 1,
-      weight: feature.properties.compiledStyle.width,
+      ...feature.properties.compiledStyle,
       interactive: this.options.onFeatureClick ? true : false,
     });
   };
