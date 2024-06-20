@@ -12,5 +12,8 @@ var tiles = L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png", {
 }).addTo(map);
 
 new EllipsisVectorLayer({
-  pathId: "06ac0f1d-4b46-4f89-be84-accc1ce4843d",
+  pathId: "312907b1-9bab-4776-b271-413e7596cf1a",
+  onFeatureClick: (f, e) => {
+    console.log(f, e);
+  },
 }).addTo(map);

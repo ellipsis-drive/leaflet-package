@@ -23,14 +23,22 @@ class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
         };
       },
       markersInheritOptions: true,
-      interactive: !!this.options.onFeatureClick,
-      onEachFeature: this.options.onFeatureClick
-        ? (feature, layer) => {
-            layer.on("click", (e) =>
-              this.options.onFeatureClick(feature, layer)
-            );
-          }
-        : undefined,
+      interactive: this.options.onFeatureClick || this.options.onFeatureHover,
+      onEachFeature:
+        this.options.onFeatureClick || this.options.onFeatureHover
+          ? (feature, layer) => {
+              if (this.options.onFeatureClick) {
+                layer.on("click", (e) =>
+                  this.options.onFeatureClick(feature, e)
+                );
+              }
+              if (this.options.onFeatureHover) {
+                layer.on("mouseover", (e) =>
+                  this.options.onFeatureHover(feature, e)
+                );
+              }
+            }
+          : undefined,
       pointToLayer: this.pointFeatureToLayer,
     });
 
