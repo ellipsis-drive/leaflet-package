@@ -2,6 +2,7 @@ import EllipsisVectorLayer from "./EllipsisVectorLayer";
 import EllipsisRasterLayer from "./EllipsisRasterLayer";
 import AsyncEllipsisRasterLayer from "./AsyncEllipsisRasterLayer";
 import getEllipsisUtilObject from "./getEllipsisUtilObject";
+import { addColorPicker } from "./ColorPicker";
 
 const EllipsisApi = getEllipsisUtilObject("EllipsisApi");
 

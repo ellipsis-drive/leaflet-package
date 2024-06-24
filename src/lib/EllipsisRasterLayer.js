@@ -1,7 +1,10 @@
 import getEllipsisUtilObject from "./getEllipsisUtilObject";
+import { addColorPicker } from "./ColorPicker";
 const RasterLayerUtil = getEllipsisUtilObject("RasterLayerUtil");
 
-class EllipsisRasterLayer extends L.tileLayer {
+addColorPicker();
+
+class EllipsisRasterLayer extends L.tileLayer.colorPicker {
   getLeafletLayer = () => this;
 
   constructor(options) {

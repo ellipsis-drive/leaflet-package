@@ -4,7 +4,7 @@ import {
   AsyncEllipsisRasterLayer,
 } from "../lib";
 
-var map = L.map("map").setView([-27.3416, 153.074], 13);
+var map = L.map("map").setView([52, 5], 9);
 
 var tiles = L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png", {
   attribution:
@@ -18,9 +18,28 @@ new EllipsisVectorLayer({
   },
 }).addTo(map);
 */
-new EllipsisRasterLayer({
-  pathId: "69b0a2d0-b66e-439a-b1f5-e447e6be8f93",
-  timestampId: "254c4536-c21c-4e73-bed1-45a9b7b9f900",
-  style: "0bc0580d-0455-4e43-87d7-0490ba2b5a56",
-  zoom: 9,
-}).addTo(map);
+
+const createEllipsisRasterLayer = async () => {
+  const someRaster = await AsyncEllipsisRasterLayer({
+    pathId: "552c92e8-8422-46eb-bb55-1eb39e18eee9",
+  });
+  someRaster.addTo(map);
+
+  map.on("mousemove", function (event) {
+    var a = someRaster.getColor(event.latlng);
+    console.log("A", a);
+    if (a !== null) {
+      var hex =
+        "#" +
+        (0x1000000 + (a[0] << 16) + (a[1] << 8) + a[2]).toString(16).substr(1);
+      var tmpl = "<b style='background:@;color:black;'>@</b>";
+      if (Math.min(a[0], a[1], a[2]) < 0x40)
+        tmpl = tmpl.replace("black", "white");
+      map.attributionControl.setPrefix(tmpl.replace(/@/g, hex));
+    } else {
+      map.attributionControl.setPrefix("unavailable");
+    }
+  });
+};
+
+createEllipsisRasterLayer();
