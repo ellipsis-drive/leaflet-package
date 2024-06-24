@@ -72,7 +72,7 @@ To use layers that are not set to public or link sharing you need to pass a toke
 
 _note_ for the style object, refer to [this documentation about it](https://docs.ellipsis-drive.com/developers/api-v3/path-raster/styles/add-style).
 
-A raster layer is equiped with a getColor function. You can use this function to get the pixel values of a certain point.
+A raster layer is equiped with a getColor function. You can use this function to get the pixel values of a certain point. The input should be an object with properties lat and lng both as float.
 
 In this example the raster value of the layer is logged on mouse hover:
 
