@@ -72,6 +72,27 @@ To use layers that are not set to public or link sharing you need to pass a toke
 
 _note_ for the style object, refer to [this documentation about it](https://docs.ellipsis-drive.com/developers/api-v3/path-raster/styles/add-style).
 
+A raster layer is equiped with a getColor function. You can use this function to get the pixel values of a certain point. The input should be an object with properties lat and lng both as float.
+
+In this example the raster value of the layer is logged on mouse hover:
+
+```js
+const layer = new EllipsisRasterLayer({
+  pathId: "552c92e8-8422-46eb-bb55-1eb39e18eee9",
+  timestampId: "a19ef596-c48b-479e-87f5-b808cf6fb4d3",
+  style: "5b2deacd-a1e3-4b3f-b53a-ae05a0c7fd8d",
+  zoom: 14,
+});
+
+map.on("mousemove", function (event) {
+  var a = layer.getColor(event.latlng);
+  console.log("A", a);
+
+});
+
+layer.addTo(map);
+```
+
 #### VectorLayer options
 
 | Name               | Description                                                              |
