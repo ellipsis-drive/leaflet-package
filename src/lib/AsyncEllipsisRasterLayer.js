@@ -12,6 +12,7 @@ const AsyncEllipsisRasterLayer = async (options) => {
 
     constructor() {
       super(result.url, {
+        ...options,
         zoom: result.zoom,
         tileSize: 256,
       });

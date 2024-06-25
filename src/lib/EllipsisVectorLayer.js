@@ -8,10 +8,7 @@ class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
     super(options);
     this.leafletLayer = L.geoJSON([], {
       style: (feature) => {
-        return {
-          ...feature.properties.compiledStyle,
-          color: feature.properties.compiledStyle.borderColor,
-        };
+        return feature.properties.compiledStyle;
       },
       markersInheritOptions: true,
       interactive: this.options.onFeatureClick || this.options.onFeatureHover,
@@ -73,6 +70,7 @@ class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
 
   updateView = () => {
     const features = this.getFeatures();
+    console.log("features", features);
     if (!this.printedFeatureIds.length) this.leafletLayer.clearLayers();
 
     const adding = features.filter(
