@@ -19,7 +19,7 @@ class EllipsisRasterLayer extends L.tileLayer.colorPicker {
     }
 
     super(RasterLayerUtil.getSlippyMapUrl(options), {
-      zoom: options.zoom,
+      ...options,
       tileSize: 256,
     });
   }

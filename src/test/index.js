@@ -18,28 +18,19 @@ new EllipsisVectorLayer({
   },
 }).addTo(map);
 */
+const layer = new EllipsisRasterLayer({
+  pathId: "552c92e8-8422-46eb-bb55-1eb39e18eee9",
+  timestampId: "a19ef596-c48b-479e-87f5-b808cf6fb4d3",
+  style: "5b2deacd-a1e3-4b3f-b53a-ae05a0c7fd8d",
+  opacity: 0.8,
+  zoom: 14,
+});
 
-const createEllipsisRasterLayer = async () => {
-  const someRaster = await AsyncEllipsisRasterLayer({
-    pathId: "552c92e8-8422-46eb-bb55-1eb39e18eee9",
-  });
-  someRaster.addTo(map);
+map.on("mousemove", function (event) {
+  var a = layer.getColor(event.latlng);
+  console.log("A", a);
+});
 
-  map.on("mousemove", function (event) {
-    var a = someRaster.getColor(event.latlng);
-    console.log("A", a);
-    if (a !== null) {
-      var hex =
-        "#" +
-        (0x1000000 + (a[0] << 16) + (a[1] << 8) + a[2]).toString(16).substr(1);
-      var tmpl = "<b style='background:@;color:black;'>@</b>";
-      if (Math.min(a[0], a[1], a[2]) < 0x40)
-        tmpl = tmpl.replace("black", "white");
-      map.attributionControl.setPrefix(tmpl.replace(/@/g, hex));
-    } else {
-      map.attributionControl.setPrefix("unavailable");
-    }
-  });
-};
+layer.addTo(map);
 
-createEllipsisRasterLayer();
+map.removeLayer(layer);
