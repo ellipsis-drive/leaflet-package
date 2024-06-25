@@ -68,6 +68,7 @@ To use layers that are not set to public or link sharing you need to pass a toke
 | timestampId | id of the timestamp                      |
 | style       | id of a style or an object describing it |
 | maxNativeZoom     | max native zoomlevel of the layer.   |
+| pane     | The name of the pane to add the layer to.   |
 | token       | token of the user                        |
 
 _note_ for the style object, refer to [this documentation about it](https://docs.ellipsis-drive.com/developers/api-v3/path-raster/styles/add-style).
@@ -111,6 +112,8 @@ layer.addTo(map);
 | maxFeaturesPerTile | The maximum number of features to load per tile. Default 200.            |
 | useMarkers         | If set to true, points will be displayed as markers. Default false.      |
 | loadAll      | Boolean whehter to keep loading features indefinitely. Default false.   |
+| pane     | The name of the pane to add the layer to.   |
+
 
 _note_ for the style object, refer to [this documentation about it](https://docs.ellipsis-drive.com/developers/api-v3/path-vector/styles/add-style).
 
