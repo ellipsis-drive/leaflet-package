@@ -7,6 +7,7 @@ class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
   constructor(options = {}) {
     super(options);
     this.leafletLayer = L.geoJSON([], {
+      ...options,
       style: (feature) => {
         return feature.properties.compiledStyle;
       },
@@ -70,7 +71,6 @@ class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
 
   updateView = () => {
     const features = this.getFeatures();
-    console.log("features", features);
     if (!this.printedFeatureIds.length) this.leafletLayer.clearLayers();
 
     const adding = features.filter(

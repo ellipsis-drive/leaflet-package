@@ -15,8 +15,3 @@ const layer = new EllipsisVectorLayer({
   pathId: "487fd1e1-7ed2-4b3d-b648-12579b08454e",
   loadAll: true,
 }).addTo(map);
-
-var layerGroup = new L.LayerGroup();
-layerGroup.addTo(map);
-layerGroup.addLayer(layer);
-//layerGroup.removeLayer(layer);
