@@ -57,7 +57,7 @@ createEllipsisRasterLayer();
 ```
 In this case only the pathId is required.
 
-You can juse the parameters documented below for additional fucntionality. For example styling, filtering, hover effects and more.
+You can use the parameters documented below for additional fucntionality. For example styling, filtering, hover effects and more.
 
 ```js
 const map = L.map("map", {
