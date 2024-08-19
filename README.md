@@ -57,6 +57,56 @@ createEllipsisRasterLayer();
 ```
 In this case only the pathId is required.
 
+You can juse the parameters documented below for additional fucntionality. For example styling, filtering, hover effects and more.
+
+```js
+const map = L.map("map", {
+  center: [51.505, -0.09],
+  zoom: 13,
+});
+const styleObject = {
+    "method": "bandToColor",
+    "name": "Map to a color based on a band value",
+    "parameters": {
+        "alpha": 1,
+        "bandNumber": 1,
+        "continuous": true,
+        "transitionPoints": [
+            {
+                "color": "#2A5C84",
+                "value": 0
+            },
+            {
+                "color": "#74AE56",
+                "value": 51
+            },
+            {
+                "color": "#FF8C01",
+                "value": 153
+            },
+            {
+                "color": "#ED2938",
+                "value": 204
+            }
+        ],
+        "noData":[{"bandNumber":1,"fromValue":0,"toValue":1}]},
+        "alphaSettings":{"bandNumber":1, "transitionPoints":[{"value":50, "alpha":0.2}, {"value":100, "alpha":0.5}] }
+    }
+}
+
+// Raster layer
+new leafletEllipsis.EllipsisRasterLayer({
+  pathId: pathId, timestampId:timestampId, style:styleId, zoom:zoom  token: yourToken, style:styleObject
+}).addTo(map);
+
+// Vector layer
+new leafletEllipsis.EllipsisVectorLayer({
+  pathId: pathId,
+  onFeatureHover:(e,f)=>{console.log('hovered over feature',f},
+  token: yourToken,
+}).addTo(map);
+```
+
 #### Obtaining tokens
 To use layers that are not set to public or link sharing you need to pass a token as a parameter. See [here](https://docs.ellipsis-drive.com/developers/authentication-options) for how to obtain such a token.
 
