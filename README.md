@@ -89,8 +89,6 @@ const styleObject = {
                 "value": 204
             }
         ],
-        "noData":[{"bandNumber":1,"fromValue":0,"toValue":1}]},
-        "alphaSettings":{"bandNumber":1, "transitionPoints":[{"value":50, "alpha":0.2}, {"value":100, "alpha":0.5}] }
     }
 }
 
